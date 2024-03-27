@@ -1,8 +1,13 @@
 {
   "name": "create-crx-monkey",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "",
+  "bin": {
+    "create-crx-monkey": "bin/create-crx-monkey"
+  },
+  "main": "./dist/node/main.js",
+  "types": "./dist/node/main.d.ts",
   "scripts": {
     "build": "bun x rollup -c",
     "watch": "bun x rollup --watch -c"
