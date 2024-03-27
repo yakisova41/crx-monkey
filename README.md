@@ -5,7 +5,13 @@ TypescriptをChrome拡張機能とUserscriptへクラスプラットフォーム
 ## Usage
 
 ```sh
+npm create crx-monkey
+bun create crx-monkey
+```
 
+```sh
+npm run dev
+bun run build
 ```
 
 ## 設定ファイル
