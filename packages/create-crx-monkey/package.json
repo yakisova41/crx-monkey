@@ -9,11 +9,17 @@
   },
   "author": "yakisova41 <yakisoba5emon@gmail.com> (https://yakisova.com/)",
   "license": "MIT",
-  "dependencies": { "chalk": "^5.3.0", "commander": "^12.0.0", "consola": "^3.2.3", "fs-extra": "^11.2.0" },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "consola": "^3.2.3",
+    "fs-extra": "^11.2.0"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@types/fs-extra": "^11.0.4",
     "rollup": "^4.13.1",
     "rollup-plugin-dts": "^6.1.0",
     "tslib": "^2.6.2"
