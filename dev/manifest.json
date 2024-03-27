@@ -1,0 +1,23 @@
+{
+  "name": "__MSG_Name__",
+  "short_name": "name",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "__MSG_Description__",
+  "default_locale": "en",
+
+  "content_scripts": [
+    {
+      "matches": ["https://www.google.com/*"],
+      "js": [
+        "src/contentScript/contentScript.ts",
+        "src/contentScript/contentScript2.ts"
+      ],
+      "css": ["src/contentScript/style.css"]
+    }
+  ],
+  "run_at": "document_end",
+  "background": {
+    "service_worker": "src/sw/sw.ts"
+  }
+}

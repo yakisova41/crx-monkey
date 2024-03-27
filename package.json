@@ -1,0 +1,23 @@
+{
+  "name": "crx-monkey-repo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:crx": "bun run --cwd packages/crx-monkey build",
+    "build:create-crx": "bun run --cwd packages/create-crx-monkey build",
+    "watch:crx": "bun run --cwd packages/crx-monkey watch",
+    "watch:create-crx": "bun run --cwd packages/create-crx-monkey watch",
+    "crx": "node packages/crx-monkey/bin/crx-monkey"
+  },
+  "author": "yakisova41 <yakisoba5emon@gmail.com> (https://yakisova.com/)",
+  "license": "MIT",
+  "packageManager": "bun@1.0.3",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.2",
+    "typescript-eslint": "^7.1.1"
+  }
+}

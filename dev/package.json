@@ -1,0 +1,12 @@
+{
+  "name": "crx-monkey-dev-testscript",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "crx-monkey": "node ../packages/crx-monkey/bin/crx-monkey"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chrome": "^0.0.263"
+  }
+}
