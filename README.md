@@ -1,6 +1,6 @@
 # CRX MONKEY
 
-TypescriptをChrome拡張機能とUserscriptのクラスプラットフォームにビルドするフレームワークです。
+TypescriptをChrome拡張機能とUserscriptへクラスプラットフォームにビルドするフレームワークです。
 
 ## Usage
 
