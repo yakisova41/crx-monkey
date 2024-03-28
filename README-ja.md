@@ -1,16 +1,49 @@
-# CRX MONKEY
+# CRX MONKEY 🐵
 
-TypescriptをChrome拡張機能とUserscriptのクラスプラットフォームにビルドするフレームワークです。
+TypescriptからChrome拡張とUserscriptへ簡単にビルド
 
-## Usage
+## インストール
+
+`create-crx-monkey`を使って簡単に設定できます。
 
 ```sh
+npm create crx-monkey
+```
+
+プロンプトに従ってセットアップしてください。
 
 ```
+Project name? any projectname...
+Select a Language? Typescript / Javascript
+```
+
+## 使用方法
+
+### 開発
+
+```sh
+npx crx-monkey dev
+```
+
+開発スクリプトが自動的にリロードされるようになります。
+
+### ビルド
+
+```sh
+npx crx-monkey build
+```
+
+バンドルされているスクリプトと拡張機能がビルドされる。
 
 ## 設定ファイル
 
-設定ファイル`crx-monkey.config.js`をプロジェクト内に必ず作成してください。
+設定ファイル `crx-monkey.config.js` をプロジェクトに作成してください。
+
+設定ファイルではデフォルトでオブジェクトをエクスポートします。
+(全ての項目が必須というわけではないので、undefinedでも大丈夫です)。
+
+> [!Note]
+> create-crx-monkeyを使用した場合、自動的に生成されます。
 
 ### 例
 

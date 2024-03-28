@@ -1,26 +1,53 @@
-# CRX MONKEY
+[Japanese/日本語](https://github.com/yakisova41/crx-monkey/blob/main/README-ja.md)
 
-TypescriptをChrome拡張機能とUserscriptへクラスプラットフォームにビルドするフレームワークです。
+# CRX MONKEY 🐵
+
+Typescript to Chrome extension and Userscript
 
 ## Installation
-`create-crx-monkey`を使用して、自動でセットアップできます。
+
+It is easy to set up using `create-crx-monkey`.
+
 ```sh
 npm create crx-monkey
 ```
 
-表示されるプロンプトに従ってセットアップしてください。
+Follow the prompts to set up.
+
 ```
 Project name? any projectname...
 Select a Language? Typescript / Javascript
 ```
 
+## Usage
 
+### Develop
 
-## 設定ファイル
+```sh
+npx crx-monkey dev
+```
 
-設定ファイル`crx-monkey.config.js`をプロジェクト内に必ず作成してください。
+A development script will be started to automatically reload
 
-### 例
+### Build
+
+```sh
+npx crx-monkey build
+```
+
+Bundled scripts and extensions will be built
+
+## Configuration file
+
+Be sure to create a configuration file `crx-monkey.config.js` in your project.
+
+Export objects by default in the configuration file.
+(Not all items are required, so undefined will also work.)
+
+> [!Note]
+> If create-crx-monkey is used, it is generated automatically.
+
+### Example
 
 ```js
 const config = {
@@ -48,43 +75,41 @@ export default config;
 
 ### manifestJsonPath
 
-`manifest.json`へのパスを指定出来ます。
+You can specify the path to `manifest.json`.
 
-使用できる`manifest_version`は`3`のみです。
-詳しいmanifestの形式は[Chrome for Developers](https://developer.chrome.com/docs/extensions/reference/manifest?hl=ja)を確認してください。
+Only manifest_version 3 is available. For more details on manifest format, please refer to [Chrome for Developers](https://developer.chrome.com/docs/extensions/reference/manifest?hl=ja).
 
 ### chromeOutputDir
 
-Chrome拡張機能がビルドされるディレクトリを指定できます。
+You can specify the directory where Chrome extensions will be built.
 
 ### userscriptOutput
 
-Userscriptがビルドされるファイルパスを指定できます。
+You can specify the file path where the Userscript will be built.
 
 ### esBuildOptions
 
-esbuildのオプションを追加で指定できます。
-詳しいオプションの形式は[esbuild - API](https://esbuild.github.io/api/)を確認してください。
+Additional esbuild options can be specified. Please check [esbuild - API](https://esbuild.github.io/api/) for detailed option formats.
 
 ### devServer
 
-開発モード時に使用するサーバーのホストとポートを指定できます。
+You can specify the host and port of the server to be used when in development mode.
 
 ```js
 devServer: {
-  port: 3000; // ファイルサーバーのポート番号
-  host: 'localhost'; // 共通のホスト
-  websocket: 3001; // 自動リロード用サーバーのポート番号
+  port: 3000; // port number of file server
+  host: 'localhost'; // hostname
+  websocket: 3001; //  port number of auto reload server
 }
 ```
 
 ### publicDir
 
-publicフォルダーのディレクトリパスを指定できます。
-そのディレクトリはビルド時に`chromeOutputDir`で指定されたパスにコピーされます。
+You can specify a directory path for the public folder.
+That directory will be copied to the path specified in `chromeOutputDir` at build time.
 
 ### userScriptHeader
 
-追加のuserscriptのヘッダーを指定できます。
+Additional userscript headers can be specified.
 
-詳しいヘッダーの形式は[Documentation | Tampermonkey](https://www.tampermonkey.net/documentation.php?locale=en)を確認してください。
+For detailed header format, please check [Documentation | Tampermonkey](https://www.tampermonkey.net/documentation.php?locale=en).
