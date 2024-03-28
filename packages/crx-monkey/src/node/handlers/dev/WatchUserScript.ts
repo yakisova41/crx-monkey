@@ -6,7 +6,10 @@ import {
   getAllJsAndCSSByContentScripts,
   geti18nMessages,
 } from 'src/node/manifest-factory/utils';
-import { convertChromeRunAtToUserJsRunAt } from 'src/node/userscript-header-factory/utils';
+import {
+  convertChromeRunAtToUserJsRunAt,
+  convertImgToBase64,
+} from 'src/node/userscript-header-factory/utils';
 import { BuildResult } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
@@ -121,6 +124,31 @@ export class WatchUserScript extends Watch implements WatchImplements {
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
         }
       });
+    }
+
+    if (this.config.importIconToUsercript) {
+      const icons = this.manifest.icons;
+
+      if (icons !== undefined) {
+        const icon48 = icons['48'];
+        if (icon48 !== undefined) {
+          const iconPath = path.join(
+            path.dirname(this.config.manifestJsonPath!),
+            icon48,
+          );
+          const base64 = convertImgToBase64(iconPath);
+          this.headerFactory.push('@icon', base64);
+        } else {
+          throw new Error('No size 48 icons were found in the icons item');
+        }
+      } else {
+        throw new Error(
+          [
+            'No "icons" entry found in manifest',
+            'Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest',
+          ].join('\n'),
+        );
+      }
     }
   }
 

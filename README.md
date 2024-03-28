@@ -51,19 +51,20 @@ Export objects by default in the configuration file.
 
 ```js
 const config = {
-  manifestJsonPath: "./manifest.json"
-  chromeOutputDir: "./dist/chrome"
-  userscriptOutput: "./dist/userscript.user.js";
+  manifestJsonPath: "./manifest.json",
+  chromeOutputDir: "./dist/chrome",
+  userscriptOutput: "./dist/userscript.user.js",
+  importIconToUsercript: true,
   esBuildOptions: {
     // ESbuild options
     minify: true
-  };
+  },
   devServer: {
     port: 3000;
     host: "localhost";
     websocket: 3001;
-  };
-  publicDir: "./public";
+  },
+  publicDir: "./public",
   userScriptHeader: [
     ["@author", "me"],
     ["@grant", "unsageWindow"]
@@ -113,3 +114,7 @@ That directory will be copied to the path specified in `chromeOutputDir` at buil
 Additional userscript headers can be specified.
 
 For detailed header format, please check [Documentation | Tampermonkey](https://www.tampermonkey.net/documentation.php?locale=en).
+
+### importIconToUsercript
+
+Convert the 48-pixel icon specified in the `manifest.json` to base64 and set it to the userscript icon.

@@ -49,19 +49,20 @@ npx crx-monkey build
 
 ```js
 const config = {
-  manifestJsonPath: "./manifest.json"
-  chromeOutputDir: "./dist/chrome"
-  userscriptOutput: "./dist/userscript.user.js";
+  manifestJsonPath: "./manifest.json",
+  chromeOutputDir: "./dist/chrome",
+  userscriptOutput: "./dist/userscript.user.js",
+  importIconToUsercript: true,
   esBuildOptions: {
     // ESbuild options
     minify: true
-  };
+  },
   devServer: {
     port: 3000;
     host: "localhost";
     websocket: 3001;
-  };
-  publicDir: "./public";
+  },
+  publicDir: "./public",
   userScriptHeader: [
     ["@author", "me"],
     ["@grant", "unsageWindow"]
@@ -113,3 +114,7 @@ publicフォルダーのディレクトリパスを指定できます。
 追加のuserscriptのヘッダーを指定できます。
 
 詳しいヘッダーの形式は[Documentation | Tampermonkey](https://www.tampermonkey.net/documentation.php?locale=en)を確認してください。
+
+### importIconToUsercript
+
+`manifest.json`に指定された48ピクセルのiconをbase64に変換してuserscriptのiconに設定します

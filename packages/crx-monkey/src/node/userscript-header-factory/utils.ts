@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export function convertChromeRunAtToUserJsRunAt(
   chromeRunAt: 'document_start' | 'document_end' | 'document_idle',
 ): 'document-start' | 'document-end' | 'document-idle' {
@@ -16,4 +19,10 @@ export function convertChromeRunAtToUserJsRunAt(
       ].join('\n'),
     );
   }
+}
+
+export function convertImgToBase64(imgPath: string) {
+  const icon = fs.readFileSync(imgPath);
+  const buf = Buffer.from(icon).toString('base64');
+  return `data:image/png;base64,${buf}`;
 }
