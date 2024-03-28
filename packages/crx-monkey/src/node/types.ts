@@ -12,6 +12,7 @@ export interface CrxMonkeyConfig {
   };
   publicDir?: string;
   userScriptHeader?: UserScriptHeader;
+  importIconToUsercript?: boolean;
 }
 
 export type UserScriptHeader = Array<[keyof UserScriptHeaderProps, string]>;

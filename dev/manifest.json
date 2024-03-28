@@ -19,5 +19,10 @@
   "run_at": "document_end",
   "background": {
     "service_worker": "src/sw/sw.ts"
+  },
+  "icons": {
+    "16": "public/icon/icon16.png",
+    "48": "public/icon/icon48.png",
+    "128": "public/icon/icon128.png"
   }
 }

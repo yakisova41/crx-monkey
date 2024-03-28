@@ -42,6 +42,10 @@ const defaultValues: DefaultValue[] = [
     key: 'userScriptHeader',
     value: [],
   },
+  {
+    key: 'importIconToUsercript',
+    value: false,
+  },
 ];
 
 async function getConfigPath(): Promise<string | null> {
