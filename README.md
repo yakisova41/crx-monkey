@@ -2,17 +2,19 @@
 
 TypescriptをChrome拡張機能とUserscriptへクラスプラットフォームにビルドするフレームワークです。
 
-## Usage
-
+## Installation
+`create-crx-monkey`を使用して、自動でセットアップできます。
 ```sh
 npm create crx-monkey
-bun create crx-monkey
 ```
 
-```sh
-npm run dev
-bun run build
+表示されるプロンプトに従ってセットアップしてください。
 ```
+Project name? any projectname...
+Select a Language? Typescript / Javascript
+```
+
+
 
 ## 設定ファイル
 
