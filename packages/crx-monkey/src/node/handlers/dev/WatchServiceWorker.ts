@@ -89,6 +89,8 @@ function generateDevSwCode({
       case 'RELOAD_CONTENT_SCRIPT':
       case 'RELOAD_SW':
       case 'RELOAD_CSS':
+      case 'RELOAD_POPUP_JS':
+      case 'RELOAD_POPUP_HTML':
         chrome.runtime.reload();
         break;
 

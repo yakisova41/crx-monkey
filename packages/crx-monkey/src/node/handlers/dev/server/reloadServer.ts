@@ -30,5 +30,10 @@ export class ReloadServer {
   }
 }
 
-export type ReloadTokens = 'RELOAD_CONTENT_SCRIPT' | 'RELOAD_CSS' | 'RELOAD_SW';
+export type ReloadTokens =
+  | 'RELOAD_CONTENT_SCRIPT'
+  | 'RELOAD_CSS'
+  | 'RELOAD_SW'
+  | 'RELOAD_POPUP_JS'
+  | 'RELOAD_POPUP_HTML';
 export type ReloadServerTokens = ReloadTokens | 'CONNECTED';

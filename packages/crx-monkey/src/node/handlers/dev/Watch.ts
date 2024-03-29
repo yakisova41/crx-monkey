@@ -1,4 +1,11 @@
-import { BuildOptions, BuildResult, Plugin, build, context } from 'esbuild';
+import {
+  BuildContext,
+  BuildOptions,
+  BuildResult,
+  Plugin,
+  build,
+  context,
+} from 'esbuild';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { CrxMonkeyConfig } from 'src/node/types';
@@ -47,6 +54,8 @@ export class Watch {
     ) => void,
     overridePlugins: Plugin[] = [],
   ) {
+    const contexts: Record<string, BuildContext<BuildOptions>> = {};
+
     await Promise.all(
       jsFilePaths.map(async (jsFilePath) => {
         const options: BuildOptions = {
@@ -86,8 +95,11 @@ export class Watch {
 
         const ctx = await context(watchOptions);
         await ctx.watch();
+        contexts[jsFilePath] = ctx;
       }),
     );
+
+    return contexts;
   }
 }
 

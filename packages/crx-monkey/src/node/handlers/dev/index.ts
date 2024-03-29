@@ -15,6 +15,7 @@ import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
 import { WatchUserScript } from './WatchUserScript';
 import { WatchContentScripts } from './WatchContentScripts';
 import { WatchServiceWorker } from './WatchServiceWorker';
+import { WatchPopup } from './WatchPopup';
 
 export default async function handleDev() {
   const config = getConfig();
@@ -53,6 +54,9 @@ export default async function handleDev() {
 
     const sw = new WatchServiceWorker(manifest, manifestFactory, reloadServer);
     await sw.watch();
+
+    const popup = new WatchPopup(manifest, manifestFactory, reloadServer);
+    await popup.watch();
 
     createDevExtension(manifestFactory);
     createDevUserscript(headerFactory);

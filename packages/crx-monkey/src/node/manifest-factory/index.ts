@@ -21,6 +21,13 @@ export class ManifestFactory {
     };
   }
 
+  public resolvePopup(distPath: string) {
+    this.workspace.action = {
+      ...this.workspace.action,
+      default_popup: distPath,
+    };
+  }
+
   public addContentScript(js: string[], css: string[], matches: string[]) {
     if (this.workspace.content_scripts !== undefined) {
       this.workspace.content_scripts.push({
