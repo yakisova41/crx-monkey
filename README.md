@@ -98,9 +98,9 @@ You can specify the host and port of the server to be used when in development m
 
 ```js
 devServer: {
-  port: 3000; // port number of file server
-  host: 'localhost'; // hostname
-  websocket: 3001; //  port number of auto reload server
+  port: 3000, // port number of file server
+  host: 'localhost', // hostname
+  websocket: 3001, //  port number of auto reload server
 }
 ```
 
