@@ -49,24 +49,24 @@ npx crx-monkey build
 
 ```js
 const config = {
-  manifestJsonPath: "./manifest.json",
-  chromeOutputDir: "./dist/chrome",
-  userscriptOutput: "./dist/userscript.user.js",
+  manifestJsonPath: './manifest.json',
+  chromeOutputDir: './dist/chrome',
+  userscriptOutput: './dist/userscript.user.js',
   importIconToUsercript: true,
   esBuildOptions: {
     // ESbuild options
-    minify: true
+    minify: true,
   },
   devServer: {
-    port: 3000;
-    host: "localhost";
-    websocket: 3001;
+    port: 3000,
+    host: 'localhost',
+    websocket: 3001,
   },
-  publicDir: "./public",
+  publicDir: './public',
   userScriptHeader: [
-    ["@author", "me"],
-    ["@grant", "unsageWindow"]
-  ]
+    ['@author', 'me'],
+    ['@grant', 'unsageWindow'],
+  ],
 };
 
 export default config;
@@ -98,9 +98,9 @@ esbuildのオプションを追加で指定できます。
 
 ```js
 devServer: {
-  port: 3000; // ファイルサーバーのポート番号
-  host: 'localhost'; // 共通のホスト
-  websocket: 3001; // 自動リロード用サーバーのポート番号
+  port: 3000, // ファイルサーバーのポート番号
+  host: 'localhost', // 共通のホスト
+  websocket: 3001, // 自動リロード用サーバーのポート番号
 }
 ```
 
