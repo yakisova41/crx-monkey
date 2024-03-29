@@ -7,6 +7,7 @@ import { BuildContentScript } from './BuildContentScript';
 import { BuildServiceWorker } from './BuildServiceWorker';
 import { BuildUserScript } from './BuildUserScript';
 import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
+import { BuildPopup } from './BuildPopup';
 
 export default async function handlebuild() {
   const config = getConfig();
@@ -22,6 +23,9 @@ export default async function handlebuild() {
 
   const sw = new BuildServiceWorker(manifest, manifestFactory);
   await sw.build();
+
+  const popup = new BuildPopup(manifest, manifestFactory);
+  await popup.build();
 
   const userscript = new BuildUserScript(
     manifest,
