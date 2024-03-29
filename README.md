@@ -60,9 +60,9 @@ const config = {
     minify: true
   },
   devServer: {
-    port: 3000;
-    host: "localhost";
-    websocket: 3001;
+    port: 3000,
+    host: "localhost",
+    websocket: 3001,
   },
   publicDir: "./public",
   userScriptHeader: [
