@@ -2,20 +2,18 @@ name: Pretter Auto Commit
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, development]
 
 env:
-  FILE_PATTERN: "packages/**/*.{ts,tsx,js,jsx}"
+  FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
 
 jobs:
   format:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
