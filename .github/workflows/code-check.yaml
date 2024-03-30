@@ -1,7 +1,8 @@
 name: Code Check
 
 on:
-  - pull_request
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   eslint:
@@ -19,6 +20,9 @@ jobs:
 
       - name: Run lint
         run: bun run lint
+
+      - name: Build
+        run: bun run build 
       
   codecov:
     runs-on: ubuntu-latest
