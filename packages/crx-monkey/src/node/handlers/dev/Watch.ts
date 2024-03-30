@@ -53,8 +53,8 @@ export class Watch {
           metafile: true,
           plugins: [
             ...overridePlugins,
-            ...(this.config.esBuildOptions?.plugins !== undefined
-              ? this.config.esBuildOptions?.plugins
+            ...(this.config.esBuildOptions.plugins !== undefined
+              ? this.config.esBuildOptions.plugins
               : []),
           ],
           ...overrideOptions,
@@ -64,7 +64,7 @@ export class Watch {
         const watchOptions: BuildOptions = {
           ...options,
           plugins: [
-            ...(options?.plugins !== undefined ? options?.plugins : []),
+            ...(options?.plugins !== undefined ? options.plugins : []),
             {
               name: 'watch-build-end',
               setup: (build) => {

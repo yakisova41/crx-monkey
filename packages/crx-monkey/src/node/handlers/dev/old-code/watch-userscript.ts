@@ -1,4 +1,4 @@
-import { BuildOptions, Plugin, PluginBuild, build, context } from 'esbuild';
+import { BuildOptions, build, context } from 'esbuild';
 import { getConfig } from 'src/node/config';
 import {
   createMatchMap,
@@ -115,7 +115,7 @@ async function watchContentJsFiles(
               });
             },
           },
-          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions.plugins : []),
         ],
         metafile: true,
         write: false,
@@ -136,7 +136,7 @@ async function watchCssFiles(
   onCopied: (cssResultStore: Record<string, Buffer>) => void,
 ) {
   const watcher = chokidar.watch(cssFiles, {});
-  watcher.on('change', (cssPath) => {
+  watcher.on('change', () => {
     const cssResultStore: Record<string, Buffer> = {};
 
     cssFiles.forEach((css, index) => {

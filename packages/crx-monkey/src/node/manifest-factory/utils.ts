@@ -1,6 +1,5 @@
 import fsExtra from 'fs-extra/esm';
 import fs from 'fs';
-import { getConfig } from '../config';
 import path from 'path';
 import { getlocalesPath } from '../handlers/utils';
 

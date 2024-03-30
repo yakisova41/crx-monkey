@@ -1,7 +1,6 @@
 import fse from 'fs-extra';
 import path from 'path';
 import { getConfig } from 'src/node/config';
-import { build } from 'esbuild';
 import { ManifestFactory } from 'src/node/manifest-factory';
 
 export function createDevExtension(factory: ManifestFactory) {

@@ -86,7 +86,7 @@ async function buildContentJsFiles(jsFiles: string[]) {
         outdir: config.chromeOutputDir,
         logLevel: 'silent',
         plugins: [
-          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions.plugins : []),
         ],
         metafile: true,
         write: false,
