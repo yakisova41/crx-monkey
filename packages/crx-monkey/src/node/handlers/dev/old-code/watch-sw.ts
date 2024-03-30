@@ -45,9 +45,7 @@ async function watchSwFile(
     outdir: config.chromeOutputDir,
     logLevel: 'warning',
     plugins: [
-      ...(config.esBuildOptions?.plugins !== undefined
-        ? config.esBuildOptions?.plugins
-        : []),
+      ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
       devSwPlugin,
     ],
     metafile: true,
@@ -97,23 +95,13 @@ const devSwPlugin: Plugin = {
         const outputPathes = Object.keys(meta.outputs);
         const buildResult = fs.readFileSync(outputPathes[0]);
 
-        fs.writeFileSync(
-          outputPathes[0],
-          [generateDevSwCode(devServer), buildResult].join('\n'),
-        );
+        fs.writeFileSync(outputPathes[0], [generateDevSwCode(devServer), buildResult].join('\n'));
       }
     });
   },
 };
 
-function generateDevSwCode({
-  host,
-  websocket,
-}: {
-  port: number;
-  host: string;
-  websocket: number;
-}) {
+function generateDevSwCode({ host, websocket }: { port: number; host: string; websocket: number }) {
   const code = `
   const websocket = new WebSocket(\`ws://${host}:${websocket}\`);
 

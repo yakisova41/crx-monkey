@@ -1,11 +1,4 @@
-import {
-  BuildContext,
-  BuildOptions,
-  BuildResult,
-  Plugin,
-  build,
-  context,
-} from 'esbuild';
+import { BuildContext, BuildOptions, BuildResult, Plugin, build, context } from 'esbuild';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { CrxMonkeyConfig } from 'src/node/types';
@@ -34,10 +27,7 @@ export class Watch {
     this.config = config;
   }
 
-  protected watchByCssPaths(
-    cssFilePaths: string[],
-    onChaged: (cssFilePath: string) => void,
-  ) {
+  protected watchByCssPaths(cssFilePaths: string[], onChaged: (cssFilePath: string) => void) {
     const watcher = chokidar.watch(cssFilePaths, {});
     watcher.on('change', (path) => {
       onChaged(path);
@@ -48,10 +38,7 @@ export class Watch {
     jsFilePaths: string[],
     onBuild: (result: BuildResult<BuildOptions>, jsFilePath: string) => void,
     overrideOptions: BuildOptions | null = null,
-    onFirstBuild: (
-      result: BuildResult<BuildOptions>,
-      jsFilePath: string,
-    ) => void,
+    onFirstBuild: (result: BuildResult<BuildOptions>, jsFilePath: string) => void,
     overridePlugins: Plugin[] = [],
   ) {
     const contexts: Record<string, BuildContext<BuildOptions>> = {};

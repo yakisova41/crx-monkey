@@ -25,8 +25,7 @@ export async function watchUserScript(
   const contentScripts = manifest.content_scripts;
 
   if (contentScripts !== undefined) {
-    const { jsFiles, cssFiles } =
-      getAllJsAndCSSByContentScripts(contentScripts);
+    const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
     /**
      * If even one css is loaded, a GM_addStyle grant is added to the header
@@ -35,11 +34,7 @@ export async function watchUserScript(
       headerFactory.push('@grant', 'GM_addStyle');
     }
 
-    const { matchMap, allMatches } = createMatchMap(
-      contentScripts,
-      jsFiles,
-      cssFiles,
-    );
+    const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
     allMatches.forEach((match) => {
       headerFactory.push('@match', match);
@@ -48,10 +43,7 @@ export async function watchUserScript(
     headerFactory.push('@version', manifest.version);
 
     if (manifest.run_at !== undefined) {
-      headerFactory.push(
-        '@run-at',
-        convertChromeRunAtToUserJsRunAt(manifest.run_at),
-      );
+      headerFactory.push('@run-at', convertChromeRunAtToUserJsRunAt(manifest.run_at));
     }
 
     const names = await geti18nMessages(manifest.name);
@@ -76,8 +68,7 @@ export async function watchUserScript(
 
     const headerCode = headerFactory.create();
 
-    let cssResultStore: Record<string, Buffer> =
-      await loadContentCssFiles(cssFiles);
+    let cssResultStore: Record<string, Buffer> = await loadContentCssFiles(cssFiles);
 
     await watchCssFiles(cssFiles, (res) => {
       cssResultStore = res;
@@ -124,9 +115,7 @@ async function watchContentJsFiles(
               });
             },
           },
-          ...(config.esBuildOptions?.plugins !== undefined
-            ? config.esBuildOptions?.plugins
-            : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
         ],
         metafile: true,
         write: false,
@@ -200,8 +189,7 @@ function generateContentScriptcode(
     let isOr = false;
     matches.forEach((matchPattern) => {
       scriptContent =
-        scriptContent +
-        `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
+        scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
 
       isOr = true;
     });
@@ -209,9 +197,7 @@ function generateContentScriptcode(
     scriptContent = scriptContent + ') {\n';
 
     if (jsBuildResultStore[filePath] !== undefined) {
-      const buildResultText = new TextDecoder().decode(
-        jsBuildResultStore[filePath],
-      );
+      const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
       scriptContent = scriptContent + buildResultText;
     }
 

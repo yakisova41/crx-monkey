@@ -2,7 +2,7 @@ import fsExtra from 'fs-extra/esm';
 import fs from 'fs';
 import { getConfig } from '../config';
 import path from 'path';
-import { getlocalesPath} from '../handlers/utils';
+import { getlocalesPath } from '../handlers/utils';
 
 /**
  * Enumerate all js and css paths from manifestjson conetnt_scripts
@@ -89,7 +89,7 @@ export function getAllJsAndCSSByContentScripts(
 }
 
 export async function geti18nMessages(key: string) {
-  let result: Record<string, string> = { en: key };
+  const result: Record<string, string> = { en: key };
   const match = key.match(/__MSG_(.*)__/);
 
   if (match !== null) {
@@ -123,11 +123,7 @@ async function getMessage(langKey: string, key: string) {
     return message;
   } else {
     throw new Error(
-      [
-        'Can not found message property',
-        `lang: ${langKey}`,
-        `key: ${key}`,
-      ].join('\n'),
+      ['Can not found message property', `lang: ${langKey}`, `key: ${key}`].join('\n'),
     );
   }
 }
@@ -141,4 +137,3 @@ function getEnableLangs(localesPath: string) {
 
   return langs;
 }
-

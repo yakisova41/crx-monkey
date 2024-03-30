@@ -18,8 +18,7 @@ export async function buildContentScript(
   const contentScripts = manifest.content_scripts;
 
   if (contentScripts !== undefined) {
-    const { jsFiles, cssFiles } =
-      getAllJsAndCSSByContentScripts(contentScripts);
+    const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
     await buildJsFiles(jsFiles, factory);
     await copyCssFiles(cssFiles, factory);
   }
@@ -42,9 +41,7 @@ async function buildJsFiles(jsFiles: string[], factory: ManifestFactory) {
         logLevel: 'info',
         plugins: [
           manifestPlugin(),
-          ...(config.esBuildOptions?.plugins !== undefined
-            ? config.esBuildOptions?.plugins
-            : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
         ],
         metafile: true,
         ...config.esBuildOptions,

@@ -6,6 +6,7 @@ const configFileNameMatch = ['crx-monkey.config.js'];
 
 interface DefaultValue {
   key: keyof CrxMonkeyConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
 }
 
@@ -60,10 +61,7 @@ async function getConfigPath(): Promise<string | null> {
         if (splited.length === 1) {
           reject(
             new Error(
-              [
-                'Config file not found.',
-                'Please create "crx-monkey-config.js"',
-              ].join('\n'),
+              ['Config file not found.', 'Please create "crx-monkey-config.js"'].join('\n'),
             ),
           );
         } else {

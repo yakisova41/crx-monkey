@@ -9,10 +9,7 @@ import path from 'path';
  * @param manifest
  * @param factory
  */
-export async function buildSW(
-  manifest: chrome.runtime.ManifestV3,
-  factory: ManifestFactory,
-) {
+export async function buildSW(manifest: chrome.runtime.ManifestV3, factory: ManifestFactory) {
   const sw = manifest.background?.service_worker;
 
   if (sw !== undefined) {
@@ -34,9 +31,7 @@ async function buildSwFile(jspath: string, factory: ManifestFactory) {
     logLevel: 'info',
     plugins: [
       manifestPlugin(),
-      ...(config.esBuildOptions?.plugins !== undefined
-        ? config.esBuildOptions?.plugins
-        : []),
+      ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
     ],
     metafile: true,
     ...config.esBuildOptions,

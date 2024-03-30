@@ -10,10 +10,7 @@ export class BuildPopup extends Build implements BuildImplements {
     const popupHtml = this.manifest.action?.default_popup;
 
     if (popupHtml !== undefined) {
-      const popupPath = path.join(
-        path.dirname(this.config.manifestJsonPath!),
-        popupHtml,
-      );
+      const popupPath = path.join(path.dirname(this.config.manifestJsonPath!), popupHtml);
 
       const root = this.getParser(popupHtml);
       this.loadRequestLocalResources(root);

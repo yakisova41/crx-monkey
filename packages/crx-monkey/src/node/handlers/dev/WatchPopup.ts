@@ -15,10 +15,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     const popupHtml = this.manifest.action?.default_popup;
 
     if (popupHtml !== undefined) {
-      const popupPath = path.join(
-        path.dirname(this.config.manifestJsonPath!),
-        popupHtml,
-      );
+      const popupPath = path.join(path.dirname(this.config.manifestJsonPath!), popupHtml);
 
       const root = this.getParser(popupHtml);
       this.loadRequestLocalResources(root);
@@ -72,9 +69,7 @@ export class WatchPopup extends Watch implements WatchImplements {
               const { metafile } = result;
               if (metafile !== undefined) {
                 const outputPathes = Object.keys(metafile.outputs);
-                const outputFile = path.basename(
-                  path.basename(outputPathes[0]),
-                );
+                const outputFile = path.basename(path.basename(outputPathes[0]));
 
                 this.outputFileNameMap[src] = outputFile;
               }
@@ -114,10 +109,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     this.requestLocalScripts = requestLocalScripts;
   }
 
-  private watchJsOnBuild(
-    result: BuildResult<BuildOptions>,
-    jsFilePath: string,
-  ) {
+  private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
     this.reloadServer.reload('RELOAD_POPUP_JS');
     consola.info(`Popup script updated. | ${jsFilePath}`);
   }
@@ -133,9 +125,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     const removedResources: string[] = [];
 
     Object.keys(this.watchingLocalScripts).forEach((watchingLocalScript) => {
-      if (
-        !Object.keys(this.requestLocalScripts).includes(watchingLocalScript)
-      ) {
+      if (!Object.keys(this.requestLocalScripts).includes(watchingLocalScript)) {
         removedResources.push(watchingLocalScript);
       }
     });

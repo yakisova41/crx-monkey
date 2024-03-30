@@ -27,11 +27,7 @@ export default async function handlebuild() {
   const popup = new BuildPopup(manifest, manifestFactory);
   await popup.build();
 
-  const userscript = new BuildUserScript(
-    manifest,
-    manifestFactory,
-    headerFactory,
-  );
+  const userscript = new BuildUserScript(manifest, manifestFactory, headerFactory);
   await userscript.build();
 
   copyLocales();

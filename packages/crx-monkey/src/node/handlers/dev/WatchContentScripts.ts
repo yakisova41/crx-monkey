@@ -10,8 +10,7 @@ export class WatchContentScripts extends Watch implements WatchImplements {
     const contentScripts = this.manifest.content_scripts;
 
     if (contentScripts !== undefined) {
-      const { jsFiles, cssFiles } =
-        getAllJsAndCSSByContentScripts(contentScripts);
+      const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
       this.copyCssFiles(cssFiles);
 
@@ -56,16 +55,9 @@ export class WatchContentScripts extends Watch implements WatchImplements {
       split.splice(split.length - 2, 1, `${split[split.length - 2]}-${index}`);
       const outPutFilename = split.join('.');
 
-      fse.copy(
-        cssFilePath,
-        path.join(this.config.chromeOutputDir!, outPutFilename),
-      );
+      fse.copy(cssFilePath, path.join(this.config.chromeOutputDir!, outPutFilename));
 
-      this.manifestFactory.resolveContentScript(
-        'css',
-        cssFilePath,
-        outPutFilename,
-      );
+      this.manifestFactory.resolveContentScript('css', cssFilePath, outPutFilename);
     });
   }
 }

@@ -9,8 +9,7 @@ export class BuildContentScript extends Build implements BuildImplements {
     const contentScripts = this.manifest.content_scripts;
 
     if (contentScripts !== undefined) {
-      const { jsFiles, cssFiles } =
-        getAllJsAndCSSByContentScripts(contentScripts);
+      const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
       this.copyCssFiles(cssFiles);
 
@@ -22,11 +21,7 @@ export class BuildContentScript extends Build implements BuildImplements {
             const outputPathes = Object.keys(metafile.outputs);
             const outputFile = path.basename(path.basename(outputPathes[0]));
 
-            this.manifestFactory.resolveContentScript(
-              'js',
-              jsFilePath,
-              outputFile,
-            );
+            this.manifestFactory.resolveContentScript('js', jsFilePath, outputFile);
           }
         },
         { logLevel: 'info' },
@@ -42,16 +37,9 @@ export class BuildContentScript extends Build implements BuildImplements {
       split.splice(split.length - 2, 1, `${split[split.length - 2]}-${index}`);
       const outPutFilename = split.join('.');
 
-      fse.copy(
-        cssFilePath,
-        path.join(this.config.chromeOutputDir!, outPutFilename),
-      );
+      fse.copy(cssFilePath, path.join(this.config.chromeOutputDir!, outPutFilename));
 
-      this.manifestFactory.resolveContentScript(
-        'css',
-        cssFilePath,
-        outPutFilename,
-      );
+      this.manifestFactory.resolveContentScript('css', cssFilePath, outPutFilename);
     });
   }
 }

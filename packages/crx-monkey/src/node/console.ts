@@ -49,10 +49,7 @@ export class ConsoleApp {
         let argvError = false;
 
         Object.keys(argv).forEach((key, index) => {
-          if (
-            !handler.argv.map((arg) => arg.name).includes(key) &&
-            index !== 0
-          ) {
+          if (!handler.argv.map((arg) => arg.name).includes(key) && index !== 0) {
             console.log(`Error: Unknown compiler option '${key}'`);
             argvError = true;
           }

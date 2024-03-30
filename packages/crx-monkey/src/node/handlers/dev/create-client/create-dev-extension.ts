@@ -18,11 +18,7 @@ export function createDevExtension(factory: ManifestFactory) {
   }
 }
 
-function generateContentScript(devServer: {
-  port: number;
-  host: string;
-  websocket: number;
-}) {
+function generateContentScript(devServer: { port: number; host: string; websocket: number }) {
   const code = `
     const websocket = new WebSocket(\`ws://${devServer.host}:${devServer.websocket}\`);
     

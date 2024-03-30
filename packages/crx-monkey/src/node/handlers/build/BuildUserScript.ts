@@ -36,19 +36,14 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     const contentScripts = this.manifest.content_scripts;
     if (contentScripts !== undefined) {
-      const { jsFiles, cssFiles } =
-        getAllJsAndCSSByContentScripts(contentScripts);
+      const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
       /**
        * If even one css is loaded, a GM_addStyle grant is added to the header
        */
       const isLoadedCss = cssFiles.length !== 0;
 
-      const { matchMap, allMatches } = createMatchMap(
-        contentScripts,
-        jsFiles,
-        cssFiles,
-      );
+      const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
       this.headerRegister(allMatches, isLoadedCss);
 
@@ -75,10 +70,7 @@ export class BuildUserScript extends Build implements BuildImplements {
     this.headerFactory.push('@version', this.manifest.version);
 
     if (this.manifest.run_at !== undefined) {
-      this.headerFactory.push(
-        '@run-at',
-        convertChromeRunAtToUserJsRunAt(this.manifest.run_at),
-      );
+      this.headerFactory.push('@run-at', convertChromeRunAtToUserJsRunAt(this.manifest.run_at));
     }
 
     const names = await geti18nMessages(this.manifest.name);
@@ -108,10 +100,7 @@ export class BuildUserScript extends Build implements BuildImplements {
     const configHeader = this.config.userScriptHeader;
     if (configHeader !== undefined) {
       configHeader.forEach((configHeaderItem) => {
-        if (
-          this.headerFactory.exist(configHeaderItem[0]) &&
-          configHeaderItem[0] !== '@grant'
-        ) {
+        if (this.headerFactory.exist(configHeaderItem[0]) && configHeaderItem[0] !== '@grant') {
           this.headerFactory.replace(configHeaderItem[0], configHeaderItem[1]);
         } else {
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
@@ -125,10 +114,7 @@ export class BuildUserScript extends Build implements BuildImplements {
       if (icons !== undefined) {
         const icon48 = icons['48'];
         if (icon48 !== undefined) {
-          const iconPath = path.join(
-            path.dirname(this.config.manifestJsonPath!),
-            icon48,
-          );
+          const iconPath = path.join(path.dirname(this.config.manifestJsonPath!), icon48);
           const base64 = convertImgToBase64(iconPath);
           this.headerFactory.push('@icon', base64);
         } else {
@@ -174,8 +160,7 @@ export class BuildUserScript extends Build implements BuildImplements {
       let isOr = false;
       matches.forEach((matchPattern) => {
         scriptContent =
-          scriptContent +
-          `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
+          scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
 
         isOr = true;
       });
@@ -183,9 +168,7 @@ export class BuildUserScript extends Build implements BuildImplements {
       scriptContent = scriptContent + ') {\n';
 
       if (jsBuildResultStore[filePath] !== undefined) {
-        const buildResultText = new TextDecoder().decode(
-          jsBuildResultStore[filePath],
-        );
+        const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
         scriptContent = scriptContent + buildResultText;
       }
 

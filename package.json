@@ -1,23 +1,28 @@
 {
   "name": "crx-monkey-repo",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:crx": "bun run --cwd packages/crx-monkey build",
     "build:create-crx": "bun run --cwd packages/create-crx-monkey build",
+    "build": "bun run build:crx && bun run build:create-crx",
     "watch:crx": "bun run --cwd packages/crx-monkey watch",
     "watch:create-crx": "bun run --cwd packages/create-crx-monkey watch",
-    "crx": "node packages/crx-monkey/bin/crx-monkey"
+    "lint:crx-monkey": "npx eslint --fix --ext .jsx,.js,.tsx,.ts packages/crx-monkey/src/node/*",
+    "format:crx-monkey": "npx prettier packages/crx-monkey/src/node/* --write --config .prettierrc",
+    "format": "bun run format:crx-monkey",
+    "lint": "bun run lint:crx-monkey"
   },
   "author": "yakisova41 <yakisoba5emon@gmail.com> (https://yakisova.com/)",
   "license": "MIT",
   "packageManager": "bun@1.0.3",
-  "devDependencies": {
-    "eslint": "^8.57.0",
+  "dependencies": {
     "prettier": "^3.2.5",
-    "typescript": "^5.4.2",
-    "typescript-eslint": "^7.1.1"
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^7.4.0",
+    "eslint": "^8.57.0"
   }
 }
