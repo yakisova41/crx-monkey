@@ -15,6 +15,10 @@ export interface CrxMonkeyConfig {
   importIconToUsercript: boolean;
 }
 
+export type NonLoadedCrxMonkeyConfig = {
+  [key in keyof CrxMonkeyConfig]?: CrxMonkeyConfig[key];
+};
+
 export type UserScriptHeader = Array<[keyof UserScriptHeaderProps, string]>;
 
 export interface UserScriptHeaderProps {
