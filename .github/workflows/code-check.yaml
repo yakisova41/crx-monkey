@@ -2,7 +2,7 @@ name: Code Check
 
 on:
   pull_request:
-    branches: [ develop ]
+    branches: [ main, develop ]
 
 jobs:
   eslint:
