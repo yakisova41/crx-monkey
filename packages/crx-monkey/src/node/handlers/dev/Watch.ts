@@ -52,6 +52,9 @@ export class Watch {
           minify: false,
           bundle: true,
           metafile: true,
+          platform: 'browser',
+          treeShaking: true,
+          target: 'esnext',
           plugins: [
             ...overridePlugins,
             ...(this.config.esBuildOptions.plugins !== undefined

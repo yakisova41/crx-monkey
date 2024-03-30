@@ -33,6 +33,9 @@ export class Build {
           logLevel: 'warning',
           bundle: true,
           metafile: true,
+          platform: 'browser',
+          treeShaking: true,
+          target: 'esnext',
           plugins: [
             ...overridePlugins,
             ...(this.config.esBuildOptions.plugins !== undefined
