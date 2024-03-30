@@ -8,10 +8,7 @@ export class Build {
   protected readonly manifestFactory: ManifestFactory;
   protected readonly config: CrxMonkeyConfig;
 
-  constructor(
-    manifest: chrome.runtime.ManifestV3,
-    manifestFactory: ManifestFactory,
-  ) {
+  constructor(manifest: chrome.runtime.ManifestV3, manifestFactory: ManifestFactory) {
     this.manifest = manifest;
     this.manifestFactory = manifestFactory;
 

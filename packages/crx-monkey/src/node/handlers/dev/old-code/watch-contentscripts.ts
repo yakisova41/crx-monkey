@@ -18,8 +18,7 @@ export async function watchContentScripts(
   const contentScripts = manifest.content_scripts;
 
   if (contentScripts !== undefined) {
-    const { jsFiles, cssFiles } =
-      getAllJsAndCSSByContentScripts(contentScripts);
+    const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
     await watchJsFiles(jsFiles, factory, ({ metafile }, filePath) => {
       reloadServer.reload('RELOAD_CONTENT_SCRIPT');
@@ -65,9 +64,7 @@ async function watchJsFiles(
         minify: true,
         metafile: true,
         plugins: [
-          ...(config.esBuildOptions?.plugins !== undefined
-            ? config.esBuildOptions?.plugins
-            : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
         ],
         ...config.esBuildOptions,
       };

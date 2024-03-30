@@ -1,4 +1,4 @@
-import { getConfig, loadConfig } from './config';
+import { loadConfig } from './config';
 import { ConsoleApp } from './console';
 import build from './handlers/build';
 import dev from './handlers/dev';

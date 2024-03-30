@@ -44,11 +44,7 @@ export class ManifestFactory {
    * @param originalPath
    * @param distPath
    */
-  public resolveContentScript(
-    type: 'css' | 'js',
-    originalPath: string,
-    distPath: string,
-  ) {
+  public resolveContentScript(type: 'css' | 'js', originalPath: string, distPath: string) {
     if (this.workspace.content_scripts !== undefined) {
       this.workspace.content_scripts.forEach((script) => {
         if (type === 'js' && script.js !== undefined) {

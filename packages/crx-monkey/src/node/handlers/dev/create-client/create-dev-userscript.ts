@@ -23,11 +23,7 @@ export function createDevUserscript(headerFactory: UserscriptHeaderFactory) {
   }
 }
 
-function generateDevUserscriptCode(devServer: {
-  port: number;
-  host: string;
-  websocket: number;
-}) {
+function generateDevUserscriptCode(devServer: { port: number; host: string; websocket: number }) {
   const code = `
   const websocket = new WebSocket('ws://${devServer.host}:${devServer.websocket}');
   

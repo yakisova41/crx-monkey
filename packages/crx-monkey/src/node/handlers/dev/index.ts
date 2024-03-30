@@ -24,32 +24,17 @@ export default async function handleDev() {
   const manifest: chrome.runtime.ManifestV3 = JSON.parse(data.toString());
 
   if (config.devServer !== undefined) {
-    const hostingServer = new ScriptHostingServer(
-      config.devServer.host,
-      config.devServer.port,
-    );
+    const hostingServer = new ScriptHostingServer(config.devServer.host, config.devServer.port);
 
-    const reloadServer = new ReloadServer(
-      config.devServer.host,
-      config.devServer.websocket,
-    );
+    const reloadServer = new ReloadServer(config.devServer.host, config.devServer.websocket);
 
     const manifestFactory = new ManifestFactory(manifest);
     const headerFactory = new UserscriptHeaderFactory();
 
-    const userscript = new WatchUserScript(
-      manifest,
-      manifestFactory,
-      headerFactory,
-      reloadServer,
-    );
+    const userscript = new WatchUserScript(manifest, manifestFactory, headerFactory, reloadServer);
     await userscript.watch();
 
-    const contentscript = new WatchContentScripts(
-      manifest,
-      manifestFactory,
-      reloadServer,
-    );
+    const contentscript = new WatchContentScripts(manifest, manifestFactory, reloadServer);
     await contentscript.watch();
 
     const sw = new WatchServiceWorker(manifest, manifestFactory, reloadServer);

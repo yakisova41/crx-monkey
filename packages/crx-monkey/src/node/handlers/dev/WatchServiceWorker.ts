@@ -25,18 +25,12 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
     }
   }
 
-  private watchJsOnBuild(
-    result: BuildResult<BuildOptions>,
-    jsFilePath: string,
-  ) {
+  private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
     this.reloadServer.reload('RELOAD_SW');
     consola.info(`Service worker updated. | ${jsFilePath}`);
   }
 
-  private watchJsOnFirstBuild(
-    result: BuildResult<BuildOptions>,
-    jsFilePath: string,
-  ) {
+  private watchJsOnFirstBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
     const { metafile } = result;
     if (metafile !== undefined) {
       const outputPathes = Object.keys(metafile.outputs);
@@ -73,14 +67,7 @@ function devServiceWorkerPlugin(config: CrxMonkeyConfig) {
   return devSwPlugin;
 }
 
-function generateDevSwCode({
-  host,
-  websocket,
-}: {
-  port: number;
-  host: string;
-  websocket: number;
-}) {
+function generateDevSwCode({ host, websocket }: { port: number; host: string; websocket: number }) {
   const code = `
   const websocket = new WebSocket(\`ws://${host}:${websocket}\`);
 

@@ -32,9 +32,6 @@ export function copyPublic() {
     fse.pathExistsSync(publicDir) &&
     config.chromeOutputDir !== undefined
   ) {
-    fse.copy(
-      publicDir,
-      path.join(config.chromeOutputDir, path.basename(publicDir)),
-    );
+    fse.copy(publicDir, path.join(config.chromeOutputDir, path.basename(publicDir)));
   }
 }

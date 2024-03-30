@@ -18,8 +18,7 @@ export async function buildUserScript(manifest: chrome.runtime.ManifestV3) {
   const contentScripts = manifest.content_scripts;
 
   if (contentScripts !== undefined) {
-    const { jsFiles, cssFiles } =
-      getAllJsAndCSSByContentScripts(contentScripts);
+    const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
     const buildResultStore = await buildContentJsFiles(jsFiles);
 
@@ -32,17 +31,9 @@ export async function buildUserScript(manifest: chrome.runtime.ManifestV3) {
       header.push('@grant', 'GM_addStyle');
     }
 
-    const { matchMap, allMatches } = createMatchMap(
-      contentScripts,
-      jsFiles,
-      cssFiles,
-    );
+    const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
-    const contentScriptcode = generateContentScriptcode(
-      matchMap,
-      buildResultStore,
-      cssResultStore,
-    );
+    const contentScriptcode = generateContentScriptcode(matchMap, buildResultStore, cssResultStore);
 
     allMatches.forEach((match) => {
       header.push('@match', match);
@@ -95,9 +86,7 @@ async function buildContentJsFiles(jsFiles: string[]) {
         outdir: config.chromeOutputDir,
         logLevel: 'silent',
         plugins: [
-          ...(config.esBuildOptions?.plugins !== undefined
-            ? config.esBuildOptions?.plugins
-            : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
         ],
         metafile: true,
         write: false,
@@ -150,8 +139,7 @@ function generateContentScriptcode(
     let isOr = false;
     matches.forEach((matchPattern) => {
       scriptContent =
-        scriptContent +
-        `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
+        scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
 
       isOr = true;
     });
@@ -159,9 +147,7 @@ function generateContentScriptcode(
     scriptContent = scriptContent + ') {\n';
 
     if (jsBuildResultStore[filePath] !== undefined) {
-      const buildResultText = new TextDecoder().decode(
-        jsBuildResultStore[filePath],
-      );
+      const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
       scriptContent = scriptContent + buildResultText;
     }
 
