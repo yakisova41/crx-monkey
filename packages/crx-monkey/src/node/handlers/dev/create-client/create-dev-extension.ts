@@ -8,13 +8,11 @@ export function createDevExtension(factory: ManifestFactory) {
 
   const config = getConfig();
 
-  if (config.chromeOutputDir !== undefined && config.devServer !== undefined) {
-    const contentScriptPath = path.join(config.chromeOutputDir, fileName);
+  const contentScriptPath = path.join(config.chromeOutputDir, fileName);
 
-    fse.outputFile(contentScriptPath, generateContentScript(config.devServer));
+  fse.outputFile(contentScriptPath, generateContentScript(config.devServer));
 
-    factory.addContentScript([fileName], [], ['https://*/*', 'http://*/*']);
-  }
+  factory.addContentScript([fileName], [], ['https://*/*', 'http://*/*']);
 }
 
 function generateContentScript(devServer: { port: number; host: string; websocket: number }) {
