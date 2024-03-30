@@ -1,7 +1,6 @@
 import { BuildOptions, BuildResult, Plugin, build, context } from 'esbuild';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
-import manifestPlugin from 'esbuild-plugin-manifest';
 import path from 'path';
 import { ReloadServer } from '../server/reloadServer';
 import fs from 'fs';
@@ -45,7 +44,7 @@ async function watchSwFile(
     outdir: config.chromeOutputDir,
     logLevel: 'warning',
     plugins: [
-      ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
+      ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions.plugins : []),
       devSwPlugin,
     ],
     metafile: true,
@@ -55,7 +54,7 @@ async function watchSwFile(
   const watchOptions: BuildOptions = {
     ...options,
     plugins: [
-      ...(options?.plugins !== undefined ? options?.plugins : []),
+      ...(options?.plugins !== undefined ? options.plugins : []),
 
       {
         name: 'onend',

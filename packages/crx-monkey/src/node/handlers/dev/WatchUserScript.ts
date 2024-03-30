@@ -59,10 +59,10 @@ export class WatchUserScript extends Watch implements WatchImplements {
           this.outputFile(matchMap);
         },
         { write: false },
-        this.watchJsOnFirstBuild.bind(this),
+        () => {},
       );
 
-      this.watchByCssPaths(cssFiles, (cssPath) => {
+      this.watchByCssPaths(cssFiles, () => {
         this.loadContentCssFiles(cssFiles);
         this.outputFile(matchMap);
       });
@@ -145,8 +145,6 @@ export class WatchUserScript extends Watch implements WatchImplements {
       this.buildResultStore[jsFilePath] = outputFiles[0].contents;
     }
   }
-
-  private watchJsOnFirstBuild(result: BuildResult) {}
 
   /**
    * Build content scripts for each match and generate code to restrict execution for each match using if

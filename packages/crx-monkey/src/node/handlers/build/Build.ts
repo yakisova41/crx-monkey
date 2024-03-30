@@ -34,8 +34,8 @@ export class Build {
           metafile: true,
           plugins: [
             ...overridePlugins,
-            ...(this.config.esBuildOptions?.plugins !== undefined
-              ? this.config.esBuildOptions?.plugins
+            ...(this.config.esBuildOptions.plugins !== undefined
+              ? this.config.esBuildOptions.plugins
               : []),
           ],
           ...overrideOptions,

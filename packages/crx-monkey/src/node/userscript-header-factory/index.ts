@@ -30,7 +30,7 @@ export class UserscriptHeaderFactory {
   }
 
   public exist(key: keyof UserScriptHeaderProps) {
-    this.detail.forEach(([detailKey], index) => {
+    this.detail.forEach(([detailKey]) => {
       if (key === detailKey) {
         return true;
       }

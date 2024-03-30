@@ -1,10 +1,9 @@
 import { Watch, WatchImplements } from './Watch';
-import { BuildContext, BuildOptions, BuildResult, Plugin } from 'esbuild';
-import fse, { remove } from 'fs-extra';
+import { BuildContext, BuildOptions, BuildResult } from 'esbuild';
+import fse from 'fs-extra';
 import path from 'path';
 import consola from 'consola';
-import { CrxMonkeyConfig } from '../../types';
-import { parse, HTMLElement, Node, NodeType } from 'node-html-parser';
+import { parse, HTMLElement } from 'node-html-parser';
 
 export class WatchPopup extends Watch implements WatchImplements {
   private requestLocalScripts: Record<string, HTMLElement> = {};
@@ -19,7 +18,7 @@ export class WatchPopup extends Watch implements WatchImplements {
 
       const root = this.getParser(popupHtml);
       this.loadRequestLocalResources(root);
-      await this.watchLocalScripts(popupPath, root);
+      await this.watchLocalScripts(popupPath);
       this.outputHTML(root);
 
       this.manifestFactory.resolvePopup('popup/popup.html');
@@ -39,7 +38,7 @@ export class WatchPopup extends Watch implements WatchImplements {
           consola.start(`Popup script watch is disposed. | ${removedFile}`);
         });
 
-        this.watchLocalScripts(popupPath, root);
+        this.watchLocalScripts(popupPath);
         this.outputHTML(root);
 
         this.reloadServer.reload('RELOAD_POPUP_HTML');
@@ -47,7 +46,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     }
   }
 
-  private async watchLocalScripts(popupPath: string, root: HTMLElement) {
+  private async watchLocalScripts(popupPath: string) {
     await Promise.all(
       Object.keys(this.requestLocalScripts).map(async (src) => {
         const scriptElem = this.requestLocalScripts[src];

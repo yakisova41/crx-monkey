@@ -2,7 +2,6 @@ import { Watch, WatchImplements } from './Watch';
 import { BuildOptions, BuildResult, Plugin } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
-import { getAllJsAndCSSByContentScripts } from 'src/node/manifest-factory/utils';
 import consola from 'consola';
 import { CrxMonkeyConfig } from 'src/node/types';
 
@@ -17,8 +16,8 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
           this.watchJsOnBuild(...args);
         },
         {},
-        (...args) => {
-          this.watchJsOnFirstBuild(...args);
+        (result) => {
+          this.watchJsOnFirstBuild(result);
         },
         [devServiceWorkerPlugin(this.config)],
       );
@@ -30,7 +29,7 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
     consola.info(`Service worker updated. | ${jsFilePath}`);
   }
 
-  private watchJsOnFirstBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
+  private watchJsOnFirstBuild(result: BuildResult<BuildOptions>) {
     const { metafile } = result;
     if (metafile !== undefined) {
       const outputPathes = Object.keys(metafile.outputs);

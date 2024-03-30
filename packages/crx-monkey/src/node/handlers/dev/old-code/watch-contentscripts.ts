@@ -1,9 +1,7 @@
 import { getConfig } from 'src/node/config';
 import { getAllJsAndCSSByContentScripts } from 'src/node/manifest-factory/utils';
 import { BuildOptions, BuildResult, build, context } from 'esbuild';
-import manifestPlugin from 'esbuild-plugin-manifest';
 import path from 'path';
-import { getDevelopDir } from '../utils';
 import { ReloadServer } from '../server/reloadServer';
 import chokidar from 'chokidar';
 import fs from 'fs';
@@ -20,7 +18,7 @@ export async function watchContentScripts(
   if (contentScripts !== undefined) {
     const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
-    await watchJsFiles(jsFiles, factory, ({ metafile }, filePath) => {
+    await watchJsFiles(jsFiles, factory, (_result, filePath) => {
       reloadServer.reload('RELOAD_CONTENT_SCRIPT');
 
       consola.info(`Content script updated. | ${filePath}`);
@@ -64,7 +62,7 @@ async function watchJsFiles(
         minify: true,
         metafile: true,
         plugins: [
-          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions.plugins : []),
         ],
         ...config.esBuildOptions,
       };
@@ -72,7 +70,7 @@ async function watchJsFiles(
       const watchOptions: BuildOptions = {
         ...options,
         plugins: [
-          ...(options?.plugins !== undefined ? options?.plugins : []),
+          ...(options?.plugins !== undefined ? options.plugins : []),
           {
             name: 'onend',
             setup: (build) => {

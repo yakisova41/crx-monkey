@@ -41,7 +41,7 @@ async function buildJsFiles(jsFiles: string[], factory: ManifestFactory) {
         logLevel: 'info',
         plugins: [
           manifestPlugin(),
-          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions?.plugins : []),
+          ...(config.esBuildOptions?.plugins !== undefined ? config.esBuildOptions.plugins : []),
         ],
         metafile: true,
         ...config.esBuildOptions,

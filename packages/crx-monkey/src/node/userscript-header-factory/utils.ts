@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 export function convertChromeRunAtToUserJsRunAt(
   chromeRunAt: 'document_start' | 'document_end' | 'document_idle',
