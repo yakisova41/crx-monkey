@@ -49,7 +49,8 @@ export class Watch {
           entryPoints: [jsFilePath],
           outdir: this.config.chromeOutputDir,
           logLevel: 'warning',
-          minify: true,
+          minify: false,
+          bundle: true,
           metafile: true,
           plugins: [
             ...overridePlugins,

@@ -31,6 +31,7 @@ export class Build {
           entryPoints: [jsFilePath],
           outdir: this.config.chromeOutputDir,
           logLevel: 'warning',
+          bundle: true,
           metafile: true,
           plugins: [
             ...overridePlugins,
