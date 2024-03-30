@@ -48,6 +48,9 @@ npx crx-monkey build
 ### 例
 
 ```js
+// @ts-check
+
+/** @type {import('crx-monkey').NonLoadedCrxMonkeyConfig} */
 const config = {
   manifestJsonPath: './manifest.json',
   chromeOutputDir: './dist/chrome',

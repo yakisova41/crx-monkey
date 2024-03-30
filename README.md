@@ -50,25 +50,28 @@ Export objects by default in the configuration file.
 ### Example
 
 ```js
+// @ts-check
+
+/** @type {import('crx-monkey').NonLoadedCrxMonkeyConfig} */
 const config = {
-  manifestJsonPath: "./manifest.json",
-  chromeOutputDir: "./dist/chrome",
-  userscriptOutput: "./dist/userscript.user.js",
+  manifestJsonPath: './manifest.json',
+  chromeOutputDir: './dist/chrome',
+  userscriptOutput: './dist/userscript.user.js',
   importIconToUsercript: true,
   esBuildOptions: {
     // ESbuild options
-    minify: true
+    minify: true,
   },
   devServer: {
     port: 3000,
-    host: "localhost",
+    host: 'localhost',
     websocket: 3001,
   },
-  publicDir: "./public",
+  publicDir: './public',
   userScriptHeader: [
-    ["@author", "me"],
-    ["@grant", "unsageWindow"]
-  ]
+    ['@author', 'me'],
+    ['@grant', 'unsageWindow'],
+  ],
 };
 
 export default config;
