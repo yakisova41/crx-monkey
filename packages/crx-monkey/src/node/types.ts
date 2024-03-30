@@ -1,18 +1,18 @@
 import { BuildOptions } from 'esbuild';
 
 export interface CrxMonkeyConfig {
-  manifestJsonPath?: string;
-  chromeOutputDir?: string;
-  userscriptOutput?: string;
-  esBuildOptions?: BuildOptions;
-  devServer?: {
+  manifestJsonPath: string;
+  chromeOutputDir: string;
+  userscriptOutput: string;
+  esBuildOptions: BuildOptions;
+  devServer: {
     port: number;
     host: string;
     websocket: number;
   };
-  publicDir?: string;
-  userScriptHeader?: UserScriptHeader;
-  importIconToUsercript?: boolean;
+  publicDir: string;
+  userScriptHeader: UserScriptHeader;
+  importIconToUsercript: boolean;
 }
 
 export type UserScriptHeader = Array<[keyof UserScriptHeaderProps, string]>;

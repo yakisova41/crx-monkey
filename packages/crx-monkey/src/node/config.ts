@@ -4,50 +4,20 @@ import path from 'path';
 
 const configFileNameMatch = ['crx-monkey.config.js'];
 
-interface DefaultValue {
-  key: keyof CrxMonkeyConfig;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any;
-}
-
-const defaultValues: DefaultValue[] = [
-  {
-    key: 'manifestJsonPath',
-    value: path.join(process.cwd(), './manifest.json'),
+const defaultConfig: CrxMonkeyConfig = {
+  manifestJsonPath: path.join(process.cwd(), './manifest.json'),
+  chromeOutputDir: path.join(process.cwd(), './dist/chrome'),
+  userscriptOutput: path.join(process.cwd(), './dist/userscript/userscript.user.js'),
+  esBuildOptions: {},
+  devServer: {
+    port: 3000,
+    host: 'localhost',
+    websocket: 3001,
   },
-  {
-    key: 'chromeOutputDir',
-    value: path.join(process.cwd(), './dist/chrome'),
-  },
-  {
-    key: 'userscriptOutput',
-    value: path.join(process.cwd(), './dist/userscript/userscript.user.js'),
-  },
-  {
-    key: 'esBuildOptions',
-    value: {},
-  },
-  {
-    key: 'devServer',
-    value: {
-      port: 3000,
-      host: 'localhost',
-      websocket: 3001,
-    },
-  },
-  {
-    key: 'publicDir',
-    value: path.join(process.cwd(), './public'),
-  },
-  {
-    key: 'userScriptHeader',
-    value: [],
-  },
-  {
-    key: 'importIconToUsercript',
-    value: false,
-  },
-];
+  publicDir: path.join(process.cwd(), './public'),
+  userScriptHeader: [],
+  importIconToUsercript: false,
+};
 
 async function getConfigPath(): Promise<string | null> {
   return await new Promise((resolve, reject) => {
@@ -92,12 +62,25 @@ async function search(dir: string): Promise<string | null> {
   });
 }
 
-function setDefaultConfig(config: CrxMonkeyConfig) {
-  const newConf: CrxMonkeyConfig = structuredClone(config);
+function isKeyof<T>(obj: object, key: T | string): key is T {
+  Object.entries(obj).forEach(([objkey]) => {
+    if (key === objkey) {
+      return true;
+    }
+  });
+  return false;
+}
 
-  defaultValues.forEach(({ key, value }) => {
-    if (config[key] === undefined) {
-      newConf[key] = value;
+function setDefaultConfig(config: Record<string, never>) {
+  const newConf: CrxMonkeyConfig = {
+    ...defaultConfig,
+  };
+
+  Object.entries(config).forEach(([key, value]) => {
+    if (isKeyof<keyof CrxMonkeyConfig>(newConf, key) && value !== undefined) {
+      if (typeof newConf[key] === typeof value) {
+        newConf[key] = value;
+      }
     }
   });
 
@@ -105,13 +88,14 @@ function setDefaultConfig(config: CrxMonkeyConfig) {
 }
 
 let configCahce: null | CrxMonkeyConfig = null;
+
 export async function loadConfig(): Promise<CrxMonkeyConfig> {
   return await new Promise((resolve) => {
     void getConfigPath()
       .then((configPath) => {
         if (configPath !== null) {
           void import(configPath).then((buildConfig) => {
-            const rawConfig: CrxMonkeyConfig = buildConfig.default;
+            const rawConfig = buildConfig.default;
             configCahce = setDefaultConfig(rawConfig);
             resolve(configCahce);
           });
