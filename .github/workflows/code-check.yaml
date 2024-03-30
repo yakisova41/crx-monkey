@@ -16,7 +16,7 @@ jobs:
         uses: oven-sh/setup-bun@v1
 
       - name: Install dependencies
-        run: bun install
+        run: bun install && bun install --cwd packages/create-crx-monkey && bun install --cwd packages/crx-monkey
 
       - name: Run lint
         run: bun run lint
