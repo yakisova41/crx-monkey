@@ -5,6 +5,7 @@ on:
 
 jobs:
   codecov:
+    runs-on: ubuntu-latest
     name: codecov
     steps:
       - name: Upload coverage reports to Codecov
