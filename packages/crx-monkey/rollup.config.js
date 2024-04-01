@@ -27,6 +27,9 @@ const nodeConfig = {
       tsconfig: './tsconfig.json',
       exclude: ['**/__tests__/**'],
     }),
+    copy({
+      targets: [{ src: 'src/node/static/files/*', dest: 'dist/node/static' }],
+    }),
   ],
 };
 
@@ -48,9 +51,6 @@ const nodeTypes = {
       exclude: ['**/__tests__/**'],
     }),
     dts(),
-    copy({
-      targets: [{ src: 'src/node/static/files/*', dest: 'dist/node/static' }],
-    }),
   ],
 };
 
@@ -68,13 +68,34 @@ const clientConfig = {
     commonjs({
       include: ['node_modules/**'],
     }),
+    json(),
     typescript({
-      declaration: true,
-      declarationDir: 'dist/client/types',
+      declaration: false,
       tsconfig: './tsconfig.json',
       exclude: ['**/__tests__/**'],
     }),
   ],
 };
 
-export default [nodeConfig, nodeTypes];
+const clientTypes = {
+  input: 'src/client/main.ts',
+  output: [
+    {
+      file: 'dist/client/main.d.ts',
+      format: 'esm',
+    },
+  ],
+  plugins: [
+    commonjs({
+      include: ['node_modules/**'],
+    }),
+    typescript({
+      declaration: false,
+      tsconfig: './tsconfig.json',
+      exclude: ['**/__tests__/**'],
+    }),
+    dts(),
+  ],
+};
+
+export default [nodeConfig, nodeTypes, clientConfig, clientTypes];

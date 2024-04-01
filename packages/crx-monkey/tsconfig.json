@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "baseUrl": ".",
-    "types": ["node", "chrome"]
+    "types": ["node", "chrome", "tampermonkey"]
   },
   "include": ["src"]
 }

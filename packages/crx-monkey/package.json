@@ -21,6 +21,7 @@
     "@types/chrome": "^0.0.263",
     "@types/express": "^4.17.21",
     "@types/fs-extra": "^11.0.4",
+    "@types/tampermonkey": "^5.0.2",
     "@types/ws": "^8.5.10",
     "rollup": "^4.12.1",
     "rollup-plugin-copy": "^3.5.0",
