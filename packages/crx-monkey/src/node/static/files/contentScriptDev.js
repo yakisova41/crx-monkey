@@ -12,3 +12,7 @@ websocket.addEventListener('message', ({ data }) => {
       break;
   }
 });
+
+setInterval(() => {
+  chrome.runtime.sendMessage('Hello sw');
+}, 15 * 1000);
