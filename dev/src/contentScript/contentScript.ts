@@ -1,4 +1,5 @@
 import { namedModule } from './module';
-
-console.log('1');
+import { getPublicUrl, getRuntime } from '../../../packages/crx-monkey/dist/client/main';
+console.log(getRuntime());
+console.log(getPublicUrl());
 namedModule();
