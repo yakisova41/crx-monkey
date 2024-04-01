@@ -2,6 +2,7 @@ import { getConfig } from 'src/node/config';
 import path from 'path';
 import fse from 'fs-extra';
 import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
+import { loadStaticFile } from 'src/node/static/main';
 
 export function createDevUserscript(headerFactory: UserscriptHeaderFactory) {
   const fileName = 'crx-monkey-dev.user.js';
@@ -24,39 +25,11 @@ export function createDevUserscript(headerFactory: UserscriptHeaderFactory) {
 }
 
 function generateDevUserscriptCode(devServer: { port: number; host: string; websocket: number }) {
-  const code = `
-  const websocket = new WebSocket('ws://${devServer.host}:${devServer.websocket}');
-  
-  websocket.addEventListener("message", ({ data }) => {
-    switch(data) {
-      case "RELOAD_CSS" :
-      case "RELOAD_CONTENT_SCRIPT" :
-        location.reload();
-        break;
-
-      default:
-        break;
-    }
+  const code = loadStaticFile(path.join(import.meta.dirname, './static/userScriptDev.js'), {
+    'devServer.host': devServer.host,
+    'devServer.port': String(devServer.port),
+    'devServer.websocket': String(devServer.websocket),
   });
-
-  async function getResponse() {
-    return new Promise((resolve) => {
-      GM.xmlHttpRequest({
-        url:'http://${devServer.host}:${devServer.port}/userscript',
-        onload: (e) => {
-          resolve(e.responseText);
-        }
-      });      
-    });
-  }
-
-  getResponse()
-    .then((code) => {
-      const scriptElem = document.createElement("script");
-      scriptElem.textContent = code;
-      unsafeWindow.document.body.appendChild(scriptElem);
-    });
-  `;
 
   return code;
 }
