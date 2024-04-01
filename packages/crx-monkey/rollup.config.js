@@ -48,6 +48,9 @@ const nodeTypes = {
       exclude: ['**/__tests__/**'],
     }),
     dts(),
+    copy({
+      targets: [{ src: 'src/node/static/files/*', dest: 'dist/node/static' }],
+    }),
   ],
 };
 

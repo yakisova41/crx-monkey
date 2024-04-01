@@ -3,6 +3,7 @@ import path from 'path';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { createMatchMap, getAllJsAndCSSByContentScripts } from 'src/node/manifest-factory/utils';
+import { loadStaticFile } from 'src/node/static/main';
 
 export function createDevExtension(factory: ManifestFactory) {
   const fileName = 'crx-monkey-contentscript.js';
@@ -26,21 +27,10 @@ export function createDevExtension(factory: ManifestFactory) {
 }
 
 function generateContentScript(devServer: { port: number; host: string; websocket: number }) {
-  const code = `
-    const websocket = new WebSocket(\`ws://${devServer.host}:${devServer.websocket}\`);
-    
-    websocket.addEventListener("message", ({ data }) => {
-      switch(data) {
-        case "RELOAD_CSS" :
-        case "RELOAD_CONTENT_SCRIPT" :
-          location.reload();
-          break;
-
-        default:
-          break;
-      }
-    });
-  `;
+  const code = loadStaticFile(path.join(import.meta.dirname, './static/contentScriptDev.js'), {
+    'devServer.host': devServer.host,
+    'devServer.websocket': String(devServer.websocket),
+  });
 
   return code;
 }
