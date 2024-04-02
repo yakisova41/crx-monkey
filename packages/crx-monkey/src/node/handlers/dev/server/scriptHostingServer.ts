@@ -1,6 +1,7 @@
 import express from 'express';
 import { getConfig } from 'src/node/config';
 import path from 'path';
+import fse from 'fs-extra';
 
 export class ScriptHostingServer {
   private readonly app: express.Express;
@@ -30,17 +31,24 @@ export class ScriptHostingServer {
     });
 
     this.app.get('/userscript', (req, res) => {
-      if (config.userscriptOutput !== undefined) {
-        res.sendFile(config.userscriptOutput);
+      const filepath = path.join(path.dirname(config.manifestJsonPath), config.userscriptOutput);
+
+      if (fse.existsSync(filepath)) {
+        res.sendFile(filepath);
       } else {
         res.send(400);
       }
     });
 
     this.app.get('/dev.user.js', (req, res) => {
-      if (config.userscriptOutput !== undefined) {
-        const userscriptDir = path.dirname(config.userscriptOutput);
-        res.sendFile(path.join(userscriptDir, 'crx-monkey-dev.user.js'));
+      const filepath = path.join(
+        path.dirname(config.manifestJsonPath),
+        path.dirname(config.userscriptOutput),
+        'crx-monkey-dev.user.js',
+      );
+
+      if (fse.existsSync(filepath)) {
+        res.sendFile(filepath);
       } else {
         res.send(400);
       }
