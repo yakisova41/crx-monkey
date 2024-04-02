@@ -13,6 +13,7 @@ import { BuildResult } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
 import { Build, BuildImplements } from './Build';
+import { generateInjectScriptCode } from '../dev/utils';
 
 export class BuildUserScript extends Build implements BuildImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -38,14 +39,11 @@ export class BuildUserScript extends Build implements BuildImplements {
     if (contentScripts !== undefined) {
       const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
-      /**
-       * If even one css is loaded, a GM_addStyle grant is added to the header
-       */
-      const isLoadedCss = cssFiles.length !== 0;
-
       const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
-      this.headerRegister(allMatches, isLoadedCss);
+      const isExistInjectScripts = this.isIncludedInjectScripts(jsFiles);
+
+      this.headerRegister(allMatches, isExistInjectScripts);
 
       this.loadContentCssFiles(cssFiles);
 
@@ -62,7 +60,7 @@ export class BuildUserScript extends Build implements BuildImplements {
     }
   }
 
-  private async headerRegister(allMatches: string[], isLoadedCss: boolean) {
+  private async headerRegister(allMatches: string[], unsafeWindow: boolean) {
     allMatches.forEach((match) => {
       this.headerFactory.push('@match', match);
     });
@@ -93,10 +91,6 @@ export class BuildUserScript extends Build implements BuildImplements {
       });
     }
 
-    if (isLoadedCss) {
-      this.headerFactory.push('@grant', 'GM_addStyle');
-    }
-
     const configHeader = this.config.userScriptHeader;
     if (configHeader !== undefined) {
       configHeader.forEach((configHeaderItem) => {
@@ -106,6 +100,10 @@ export class BuildUserScript extends Build implements BuildImplements {
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
         }
       });
+    }
+
+    if (unsafeWindow) {
+      this.headerFactory.push('@grant', 'unsafeWindow');
     }
 
     if (this.config.importIconToUsercript) {
@@ -169,7 +167,12 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       if (jsBuildResultStore[filePath] !== undefined) {
         const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
-        scriptContent = scriptContent + buildResultText;
+
+        if (this.config.userscriptInjectPage.includes(filePath)) {
+          scriptContent = scriptContent + generateInjectScriptCode(buildResultText);
+        } else {
+          scriptContent = scriptContent + buildResultText;
+        }
       }
 
       if (cssResultStore[filePath] !== undefined) {
@@ -214,5 +217,17 @@ export class BuildUserScript extends Build implements BuildImplements {
       const result = fse.readFileSync(cssFilePath);
       this.cssResultStore[cssFilePath] = result;
     });
+  }
+
+  private isIncludedInjectScripts(jsFiles: string[]) {
+    let result = false;
+
+    jsFiles.forEach((jsFile) => {
+      if (this.config.userscriptInjectPage.includes(jsFile)) {
+        result = true;
+      }
+    });
+
+    return result;
   }
 }

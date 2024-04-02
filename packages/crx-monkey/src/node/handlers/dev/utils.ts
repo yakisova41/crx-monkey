@@ -11,3 +11,13 @@ export function getDevelopDir() {
     throw new Error('');
   }
 }
+
+export function generateInjectScriptCode(scriptContent: string) {
+  return [
+    `const inject = ()=>{${scriptContent}}`,
+    'const script = document.createElement("script");',
+    'script.innerHTML = `(${inject.toString()})()`',
+    'unsafeWindow.document.body.appendChild(script)',
+    '',
+  ].join('\n');
+}
