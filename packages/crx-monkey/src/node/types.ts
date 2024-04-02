@@ -13,6 +13,7 @@ export interface CrxMonkeyConfig {
   publicDir: string;
   userScriptHeader: UserScriptHeader;
   importIconToUsercript: boolean;
+  userscriptInjectPage: string[];
 }
 
 export type NonLoadedCrxMonkeyConfig = {

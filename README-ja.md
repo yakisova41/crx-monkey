@@ -70,6 +70,7 @@ const config = {
     ['@author', 'me'],
     ['@grant', 'unsageWindow'],
   ],
+  userscriptInjectPage: ['src/contentScript/contentScript.ts'],
 };
 
 export default config;
@@ -121,3 +122,7 @@ publicフォルダーのディレクトリパスを指定できます。
 ### importIconToUsercript
 
 `manifest.json`に指定された48ピクセルのiconをbase64に変換してuserscriptのiconに設定します
+
+### userscriptInjectPage
+
+userscriptとして読み込む際にunsafeWindowからアクセスしたbodyへ直接scriptタグを使用して挿入するcontentscriptを指定できます。

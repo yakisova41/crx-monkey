@@ -17,6 +17,7 @@ const defaultConfig: CrxMonkeyConfig = {
   publicDir: path.join(process.cwd(), './public'),
   userScriptHeader: [],
   importIconToUsercript: false,
+  userscriptInjectPage: [],
 };
 
 async function getConfigPath(): Promise<string | null> {
