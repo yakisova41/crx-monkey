@@ -14,7 +14,6 @@ import { BuildResult } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
 import { ReloadServer } from './server/reloadServer';
-import { generateInjectScriptCode } from './utils';
 
 export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -44,9 +43,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
-      const isExistInjectScripts = this.isIncludedInjectScripts(jsFiles);
-
-      this.headerRegister(allMatches, isExistInjectScripts);
+      this.headerRegister(allMatches);
 
       this.loadContentCssFiles(cssFiles);
 
@@ -67,7 +64,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
     }
   }
 
-  private async headerRegister(allMatches: string[], unsafeWindow: boolean) {
+  private async headerRegister(allMatches: string[]) {
     allMatches.forEach((match) => {
       this.headerFactory.push('@match', match);
     });
@@ -107,10 +104,6 @@ export class WatchUserScript extends Watch implements WatchImplements {
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
         }
       });
-    }
-
-    if (unsafeWindow) {
-      this.headerFactory.push('@grant', 'unsafeWindow');
     }
 
     if (this.config.importIconToUsercript) {
@@ -175,11 +168,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
       if (jsBuildResultStore[filePath] !== undefined) {
         const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
 
-        if (this.config.userscriptInjectPage.includes(filePath)) {
-          scriptContent = scriptContent + generateInjectScriptCode(buildResultText);
-        } else {
-          scriptContent = scriptContent + buildResultText;
-        }
+        scriptContent = scriptContent + buildResultText;
       }
 
       if (cssResultStore[filePath] !== undefined) {
@@ -224,17 +213,5 @@ export class WatchUserScript extends Watch implements WatchImplements {
       const result = fse.readFileSync(cssFilePath);
       this.cssResultStore[cssFilePath] = result;
     });
-  }
-
-  private isIncludedInjectScripts(jsFiles: string[]) {
-    let result = false;
-
-    jsFiles.forEach((jsFile) => {
-      if (this.config.userscriptInjectPage.includes(jsFile)) {
-        result = true;
-      }
-    });
-
-    return result;
   }
 }

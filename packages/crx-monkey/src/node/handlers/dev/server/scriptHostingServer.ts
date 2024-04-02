@@ -31,7 +31,10 @@ export class ScriptHostingServer {
     });
 
     this.app.get('/userscript', (req, res) => {
-      const filepath = path.join(path.dirname(config.manifestJsonPath), config.userscriptOutput);
+      let filepath = config.userscriptOutput;
+      if (!path.isAbsolute(config.userscriptOutput)) {
+        filepath = path.join(path.dirname(config.manifestJsonPath), config.userscriptOutput);
+      }
 
       if (fse.existsSync(filepath)) {
         res.sendFile(filepath);
