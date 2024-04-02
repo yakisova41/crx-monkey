@@ -41,11 +41,7 @@ export class ScriptHostingServer {
     });
 
     this.app.get('/dev.user.js', (req, res) => {
-      const filepath = path.join(
-        path.dirname(config.manifestJsonPath),
-        path.dirname(config.userscriptOutput),
-        'crx-monkey-dev.user.js',
-      );
+      const filepath = path.join(path.dirname(config.userscriptOutput), 'crx-monkey-dev.user.js');
 
       if (fse.existsSync(filepath)) {
         res.sendFile(filepath);
