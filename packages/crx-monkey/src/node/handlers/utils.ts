@@ -25,13 +25,8 @@ export function getlocalesPath() {
 
 export function copyPublic() {
   const config = getConfig();
-  const publicDir = config.publicDir;
-
-  if (
-    publicDir !== undefined &&
-    fse.pathExistsSync(publicDir) &&
-    config.chromeOutputDir !== undefined
-  ) {
+  const publicDir = path.join(process.cwd(), config.publicDir);
+  if (publicDir !== undefined && fse.pathExistsSync(publicDir)) {
     fse.copy(publicDir, path.join(config.chromeOutputDir, path.basename(publicDir)));
   }
 }

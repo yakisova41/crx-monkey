@@ -63,12 +63,13 @@ async function search(dir: string): Promise<string | null> {
 }
 
 function isKeyof<T>(obj: object, key: T | string): key is T {
-  Object.entries(obj).forEach(([objkey]) => {
+  let result = false;
+  Object.keys(obj).forEach((objkey) => {
     if (key === objkey) {
-      return true;
+      result = true;
     }
   });
-  return false;
+  return result;
 }
 
 function setDefaultConfig(config: Record<string, never>) {
