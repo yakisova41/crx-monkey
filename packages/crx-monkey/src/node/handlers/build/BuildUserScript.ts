@@ -43,7 +43,7 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       const isExistInjectScripts = this.isIncludedInjectScripts(jsFiles);
 
-      this.headerRegister(allMatches, isExistInjectScripts);
+      await this.headerRegister(allMatches, isExistInjectScripts);
 
       this.loadContentCssFiles(cssFiles);
 
