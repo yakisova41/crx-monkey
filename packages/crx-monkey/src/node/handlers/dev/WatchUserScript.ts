@@ -43,7 +43,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
-      this.headerRegister(allMatches);
+      await this.headerRegister(allMatches);
 
       this.loadContentCssFiles(cssFiles);
 

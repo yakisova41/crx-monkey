@@ -43,7 +43,7 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       const isExistInjectScripts = this.isIncludedInjectScripts(jsFiles);
 
-      this.headerRegister(allMatches, isExistInjectScripts);
+      await this.headerRegister(allMatches, isExistInjectScripts);
 
       this.loadContentCssFiles(cssFiles);
 
@@ -98,6 +98,11 @@ export class BuildUserScript extends Build implements BuildImplements {
           this.headerFactory.replace(configHeaderItem[0], configHeaderItem[1]);
         } else {
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
+
+          // If already included unsafewindow in grant, after no need include.
+          if (configHeaderItem[0] === '@grant' && configHeaderItem[1] === 'unsafeWindow') {
+            unsafeWindow = false;
+          }
         }
       });
     }
