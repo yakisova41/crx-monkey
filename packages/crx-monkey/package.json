@@ -1,7 +1,7 @@
 {
   "name": "crx-monkey",
   "type": "module",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "",
   "bin": {
     "crx-monkey": "bin/crx-monkey"
