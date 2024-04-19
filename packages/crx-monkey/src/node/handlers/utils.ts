@@ -2,6 +2,9 @@ import { getConfig } from '../config';
 import path from 'path';
 import fse from 'fs-extra';
 
+/**
+ * Copy the locales dir to dist.
+ */
 export function copyLocales() {
   const localesPath = getlocalesPath();
   const config = getConfig();
@@ -11,6 +14,10 @@ export function copyLocales() {
   }
 }
 
+/**
+ * If selected the path, using it.
+ * But not selected, this function return the path of _locales dir in parent dir of manifest.json.
+ */
 export function getlocalesPath() {
   const config = getConfig();
 
@@ -23,6 +30,9 @@ export function getlocalesPath() {
   }
 }
 
+/**
+ * Copy the public dir to dist.
+ */
 export function copyPublic() {
   const config = getConfig();
   const publicDir = path.join(process.cwd(), config.publicDir);

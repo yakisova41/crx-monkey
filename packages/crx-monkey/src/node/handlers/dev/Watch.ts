@@ -34,6 +34,15 @@ export class Watch {
     });
   }
 
+  /**
+   * Watch multiple js files.
+   * @param jsFilePaths
+   * @param onBuild
+   * @param overrideOptions
+   * @param onFirstBuild
+   * @param overridePlugins
+   * @returns
+   */
   protected async watchByJsFilePaths(
     jsFilePaths: string[],
     onBuild: (result: BuildResult<BuildOptions>, jsFilePath: string) => void,

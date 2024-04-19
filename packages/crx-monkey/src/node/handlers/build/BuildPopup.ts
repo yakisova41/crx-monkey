@@ -21,6 +21,10 @@ export class BuildPopup extends Build implements BuildImplements {
     }
   }
 
+  /**
+   * Build scripts that loaded in popup html.
+   * @param popupPath
+   */
   private async buildLocalScripts(popupPath: string) {
     await Promise.all(
       Object.keys(this.requestLocalScripts).map(async (src) => {
@@ -48,6 +52,11 @@ export class BuildPopup extends Build implements BuildImplements {
     );
   }
 
+  /**
+   * Get Html parser instance.
+   * @param htmlPath
+   * @returns
+   */
   private getParser(htmlPath: string) {
     const content = fse.readFileSync(htmlPath).toString();
     const root = parse(content);
@@ -55,6 +64,10 @@ export class BuildPopup extends Build implements BuildImplements {
     return root;
   }
 
+  /**
+   * Load paths of local script loaded by popup html.
+   * @param root
+   */
   private loadRequestLocalResources(root: HTMLElement) {
     const scriptElems = root.querySelectorAll('script');
 
@@ -63,6 +76,7 @@ export class BuildPopup extends Build implements BuildImplements {
     scriptElems.forEach((elem) => {
       const src = elem.getAttribute('src');
       if (src !== undefined && src !== null) {
+        // Except the script href that start http.
         if (src.match('^http.*') === null) {
           requestLocalScripts[src] = elem;
         }
@@ -72,6 +86,10 @@ export class BuildPopup extends Build implements BuildImplements {
     this.requestLocalScripts = requestLocalScripts;
   }
 
+  /**
+   * Output html data in parser instance to dist.
+   * @param parserRoot
+   */
   private outputHTML(parserRoot: HTMLElement) {
     fse.outputFile(
       path.join(this.config.chromeOutputDir!, 'popup/popup.html'),

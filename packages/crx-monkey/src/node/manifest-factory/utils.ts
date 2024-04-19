@@ -4,7 +4,7 @@ import path from 'path';
 import { getlocalesPath } from '../handlers/utils';
 
 /**
- * Enumerate all js and css paths from manifestjson conetnt_scripts
+ * Enumerate all js and css paths from conetnt_scripts in manifestjson
  * @param contentScripts
  * @param jsFiles
  * @param cssFiles
@@ -87,6 +87,11 @@ export function getAllJsAndCSSByContentScripts(
   };
 }
 
+/**
+ * Get messages in locale each language.
+ * @param key
+ * @returns
+ */
 export async function geti18nMessages(key: string) {
   const result: Record<string, string> = { en: key };
   const match = key.match(/__MSG_(.*)__/);
@@ -109,6 +114,11 @@ export async function geti18nMessages(key: string) {
   return result;
 }
 
+/**
+ * Get the message in locale.
+ * @param key
+ * @returns
+ */
 async function getMessage(langKey: string, key: string) {
   const localesPath = getlocalesPath();
   const messagesJsonPath = path.resolve(localesPath, langKey, 'messages.json');
@@ -127,6 +137,12 @@ async function getMessage(langKey: string, key: string) {
   }
 }
 
+/**
+ * Get avaiable language.
+ * Must include en in locale!!
+ * @param localesPath
+ * @returns
+ */
 function getEnableLangs(localesPath: string) {
   const langs = fs.readdirSync(localesPath);
 

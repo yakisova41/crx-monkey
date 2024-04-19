@@ -19,6 +19,13 @@ export class Build {
     this.config = config;
   }
 
+  /**
+   * Build multiple js files.
+   * @param jsFilePaths pathes.
+   * @param onBuild
+   * @param overrideOptions
+   * @param overridePlugins
+   */
   protected async buildByJsFilePaths(
     jsFilePaths: string[],
     onBuild: (result: BuildResult<BuildOptions>, jsFilePath: string) => void,

@@ -1,10 +1,18 @@
 import { WebSocketServer } from 'ws';
 
+/**
+ * The websocket server of manage auto reload.
+ */
 export class ReloadServer {
   private readonly wserver: WebSocketServer;
   private readonly host: string;
   private readonly port: number;
 
+  /**
+   * Start and setup server.
+   * @param host
+   * @param port
+   */
   constructor(host: string, port: number) {
     this.host = host;
     this.port = port;
@@ -16,6 +24,10 @@ export class ReloadServer {
     this.setup();
   }
 
+  /**
+   * Send reload signal to websocket client.
+   * @param token
+   */
   public reload(token: ReloadTokens) {
     this.wserver.clients.forEach((client) => {
       client.send(token);

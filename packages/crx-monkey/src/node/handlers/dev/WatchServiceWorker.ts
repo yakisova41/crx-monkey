@@ -41,6 +41,11 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
   }
 }
 
+/**
+ * Plugin outputing code that marge service worker code and build result.
+ * @param config
+ * @returns
+ */
 function devServiceWorkerPlugin(config: CrxMonkeyConfig) {
   const devSwPlugin: Plugin = {
     name: 'dev-sw-plugin',
@@ -67,6 +72,11 @@ function devServiceWorkerPlugin(config: CrxMonkeyConfig) {
   return devSwPlugin;
 }
 
+/**
+ * Get static service worker code.
+ * @param param0
+ * @returns
+ */
 function generateDevSwCode({ host, websocket }: { port: number; host: string; websocket: number }) {
   const code = loadStaticFile(path.join(import.meta.dirname, './static/swDev.js'), {
     host,

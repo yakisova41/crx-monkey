@@ -20,6 +20,10 @@ const defaultConfig: CrxMonkeyConfig = {
   userscriptInjectPage: [],
 };
 
+/**
+ * Get the path to crx-monkey.config.js.
+ * @returns
+ */
 async function getConfigPath(): Promise<string | null> {
   return await new Promise((resolve, reject) => {
     let dir = process.cwd();
@@ -47,6 +51,11 @@ async function getConfigPath(): Promise<string | null> {
   });
 }
 
+/**
+ * Find config file.
+ * @param dir
+ * @returns
+ */
 async function search(dir: string): Promise<string | null> {
   return await new Promise((resolve) => {
     void promises.readdir(dir + '/').then((files) => {
@@ -63,6 +72,12 @@ async function search(dir: string): Promise<string | null> {
   });
 }
 
+/**
+ * [Type guard] Is the key contained object??
+ * @param obj
+ * @param key
+ * @returns
+ */
 function isKeyof<T>(obj: object, key: T | string): key is T {
   let result = false;
   Object.keys(obj).forEach((objkey) => {
@@ -73,6 +88,11 @@ function isKeyof<T>(obj: object, key: T | string): key is T {
   return result;
 }
 
+/**
+ * If value in config is undefined, that value will be default value.
+ * @param config LKoaded config data.
+ * @returns
+ */
 function setDefaultConfig(config: Record<string, never>) {
   const newConf: CrxMonkeyConfig = {
     ...defaultConfig,
@@ -89,8 +109,16 @@ function setDefaultConfig(config: Record<string, never>) {
   return newConf;
 }
 
+/**
+ * Loaded config data.
+ * It is null when before use loadConfig() use.
+ */
 let configCahce: null | CrxMonkeyConfig = null;
 
+/**
+ * Load config file in project.
+ * @returns
+ */
 export async function loadConfig(): Promise<CrxMonkeyConfig> {
   return await new Promise((resolve) => {
     void getConfigPath()
@@ -111,6 +139,11 @@ export async function loadConfig(): Promise<CrxMonkeyConfig> {
   });
 }
 
+/**
+ * Get config that had loaded.
+ * Must run loadConfig() before use!
+ * @returns
+ */
 export function getConfig() {
   if (configCahce !== null) {
     return configCahce;
