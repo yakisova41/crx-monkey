@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
 
+  workflow_dispatch:
+
 env:
   FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
 
