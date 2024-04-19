@@ -10,6 +10,10 @@ export class ManifestFactory {
     this.workspace = structuredClone(this.originalManifest);
   }
 
+  /**
+   * Output the current manifest data.
+   * @returns
+   */
   public getWorkspace() {
     return this.workspace;
   }

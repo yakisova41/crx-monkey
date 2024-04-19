@@ -48,6 +48,10 @@ export class WatchContentScripts extends Watch implements WatchImplements {
     }
   }
 
+  /**
+   * Copy css files to dist.
+   * @param cssFilePaths
+   */
   private copyCssFiles(cssFilePaths: string[]) {
     cssFilePaths.forEach((cssFilePath, index) => {
       const fileName = path.basename(cssFilePath);

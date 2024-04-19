@@ -30,6 +30,10 @@ export class BuildContentScript extends Build implements BuildImplements {
     }
   }
 
+  /**
+   * Copy css files to dist.
+   * @param cssFilePaths
+   */
   private copyCssFiles(cssFilePaths: string[]) {
     cssFilePaths.forEach((cssFilePath, index) => {
       const fileName = path.basename(cssFilePath);

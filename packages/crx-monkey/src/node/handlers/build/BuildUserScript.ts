@@ -30,12 +30,19 @@ export class BuildUserScript extends Build implements BuildImplements {
     this.headerFactory = headerFactory;
   }
 
+  /**
+   * Build userscript
+   */
   public async build() {
     if (this.config.devServer === undefined) {
       throw new Error('Dev Server is not enabled');
     }
 
+    /**
+     * Build and output content scripts.
+     */
     const contentScripts = this.manifest.content_scripts;
+
     if (contentScripts !== undefined) {
       const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
@@ -60,26 +67,46 @@ export class BuildUserScript extends Build implements BuildImplements {
     }
   }
 
+  /**
+   * Register meta data to userscript header factory.
+   * @param allMatches
+   * @param unsafeWindow
+   */
   private async headerRegister(allMatches: string[], unsafeWindow: boolean) {
+    /**
+     * Set all match to header.
+     */
     allMatches.forEach((match) => {
       this.headerFactory.push('@match', match);
     });
 
+    /**
+     * Set version designation by manifest to header.
+     */
     this.headerFactory.push('@version', this.manifest.version);
 
     if (this.manifest.run_at !== undefined) {
       this.headerFactory.push('@run-at', convertChromeRunAtToUserJsRunAt(this.manifest.run_at));
     }
 
+    /**
+     * Set name.
+     * If can not found locale message, even if language key is not en, it will be en.
+     */
     const names = await geti18nMessages(this.manifest.name);
     Object.keys(names).forEach((lang) => {
       if (lang === 'en') {
+        // default is en.
         this.headerFactory.push('@name', names[lang]);
       } else {
         this.headerFactory.push(`@name:${lang}`, names[lang]);
       }
     });
 
+    /**
+     * Set description.
+     * If can not found locale message, even if language key is not en, it will be en.
+     */
     if (this.manifest.description !== undefined) {
       const descriptions = await geti18nMessages(this.manifest.description);
       Object.keys(descriptions).forEach((lang) => {
@@ -94,9 +121,11 @@ export class BuildUserScript extends Build implements BuildImplements {
     const configHeader = this.config.userScriptHeader;
     if (configHeader !== undefined) {
       configHeader.forEach((configHeaderItem) => {
+        // If key is not @grant and already exists it in header, it replace value into configHeaderItem[1].
         if (this.headerFactory.exist(configHeaderItem[0]) && configHeaderItem[0] !== '@grant') {
           this.headerFactory.replace(configHeaderItem[0], configHeaderItem[1]);
         } else {
+          // If key is @grant and already exists it in header, add an add additional it.
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
 
           // If already included unsafewindow in grant, after no need include.
@@ -108,9 +137,13 @@ export class BuildUserScript extends Build implements BuildImplements {
     }
 
     if (unsafeWindow) {
+      // If not already included unsafewindow, run it.
       this.headerFactory.push('@grant', 'unsafeWindow');
     }
 
+    /**
+     * Add icon of 48size that converted to base64 in manifest.json to userscript.
+     */
     if (this.config.importIconToUsercript) {
       const icons = this.manifest.icons;
 
@@ -143,7 +176,7 @@ export class BuildUserScript extends Build implements BuildImplements {
   }
 
   /**
-   * Build content scripts for each match and generate code to restrict execution for each match using if
+   * Build content scripts for each match and generate code to restrict execution for each match using the if syntax.
    * @param matchMap
    * @param jsBuildResultStore
    * @param cssResultStore
@@ -154,13 +187,18 @@ export class BuildUserScript extends Build implements BuildImplements {
     jsBuildResultStore: Record<string, Uint8Array>,
     cssResultStore: Record<string, Buffer>,
   ) {
+    // script result tmp.
     let scriptContent = '';
+
     Object.keys(matchMap).forEach((filePath) => {
       const matches = matchMap[filePath];
 
+      // Start conditional statement of if for branch of href.
       scriptContent = scriptContent + 'if (';
 
+      // Does this contentscript have multiple match href?
       let isOr = false;
+
       matches.forEach((matchPattern) => {
         scriptContent =
           scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
@@ -168,18 +206,24 @@ export class BuildUserScript extends Build implements BuildImplements {
         isOr = true;
       });
 
+      // End conditional statement.
       scriptContent = scriptContent + ') {\n';
 
       if (jsBuildResultStore[filePath] !== undefined) {
         const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
 
         if (this.config.userscriptInjectPage.includes(filePath)) {
+          // Inject script using DOM.
           scriptContent = scriptContent + generateInjectScriptCode(buildResultText);
         } else {
+          // Run script in userscript sandbox.
           scriptContent = scriptContent + buildResultText;
         }
       }
 
+      /**
+       * Inject style using DOM.
+       */
       if (cssResultStore[filePath] !== undefined) {
         const cssText = cssResultStore[filePath].toString();
         scriptContent =
@@ -191,12 +235,17 @@ export class BuildUserScript extends Build implements BuildImplements {
           ].join('\n');
       }
 
+      // End if.
       scriptContent = scriptContent + '}\n\n';
     });
 
     return scriptContent;
   }
 
+  /**
+   * Marge userscript header, content script code and css inject code and output it.
+   * @param matchMap
+   */
   private outputFile(matchMap: Record<string, string[]>) {
     const contentScriptcode = this.generateContentScriptcode(
       matchMap,
@@ -213,6 +262,10 @@ export class BuildUserScript extends Build implements BuildImplements {
     }
   }
 
+  /**
+   * Load content of css file selected by manifest.json and store it Buffer to this.cssResultStore.
+   * @param cssFilePaths
+   */
   private loadContentCssFiles(cssFilePaths: string[]) {
     cssFilePaths.forEach((cssFilePath, index) => {
       const fileName = path.basename(cssFilePath);
@@ -224,6 +277,11 @@ export class BuildUserScript extends Build implements BuildImplements {
     });
   }
 
+  /**
+   * Does "userscriptInjectPage" in config contain even one js files?
+   * @param jsFiles js file paths.
+   * @returns
+   */
   private isIncludedInjectScripts(jsFiles: string[]) {
     let result = false;
 

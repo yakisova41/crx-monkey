@@ -58,7 +58,6 @@ export default async function handleDev() {
 
     await hostingServer.start();
 
-    //   console.clear();
     consola.box(
       [
         `${chalk.cyan.bold('CRX-MONKEY')} ${chalk.green(`v${pkg.version}`)}`,

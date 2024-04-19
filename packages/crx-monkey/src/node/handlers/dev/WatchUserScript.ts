@@ -64,26 +64,46 @@ export class WatchUserScript extends Watch implements WatchImplements {
     }
   }
 
+  /**
+   * Register meta data to userscript header factory.
+   * @param allMatches
+   * @param unsafeWindow
+   */
   private async headerRegister(allMatches: string[]) {
+    /**
+     * Set all match to header.
+     */
     allMatches.forEach((match) => {
       this.headerFactory.push('@match', match);
     });
 
+    /**
+     * Set version designation by manifest to header.
+     */
     this.headerFactory.push('@version', this.manifest.version);
 
     if (this.manifest.run_at !== undefined) {
       this.headerFactory.push('@run-at', convertChromeRunAtToUserJsRunAt(this.manifest.run_at));
     }
 
+    /**
+     * Set name.
+     * If can not found locale message, even if language key is not en, it will be en.
+     */
     const names = await geti18nMessages(this.manifest.name);
     Object.keys(names).forEach((lang) => {
       if (lang === 'en') {
+        // default is en.
         this.headerFactory.push('@name', names[lang]);
       } else {
         this.headerFactory.push(`@name:${lang}`, names[lang]);
       }
     });
 
+    /**
+     * Set description.
+     * If can not found locale message, even if language key is not en, it will be en.
+     */
     if (this.manifest.description !== undefined) {
       const descriptions = await geti18nMessages(this.manifest.description);
       Object.keys(descriptions).forEach((lang) => {
@@ -98,14 +118,19 @@ export class WatchUserScript extends Watch implements WatchImplements {
     const configHeader = this.config.userScriptHeader;
     if (configHeader !== undefined) {
       configHeader.forEach((configHeaderItem) => {
+        // If key is not @grant and already exists it in header, it replace value into configHeaderItem[1].
         if (this.headerFactory.exist(configHeaderItem[0]) && configHeaderItem[0] !== '@grant') {
           this.headerFactory.replace(configHeaderItem[0], configHeaderItem[1]);
         } else {
+          // If key is @grant and already exists it in header, add an add additional it.
           this.headerFactory.push(configHeaderItem[0], configHeaderItem[1]);
         }
       });
     }
 
+    /**
+     * Add icon of 48size that converted to base64 in manifest.json to userscript.
+     */
     if (this.config.importIconToUsercript) {
       const icons = this.manifest.icons;
 
@@ -149,13 +174,18 @@ export class WatchUserScript extends Watch implements WatchImplements {
     jsBuildResultStore: Record<string, Uint8Array>,
     cssResultStore: Record<string, Buffer>,
   ) {
+    // script result tmp.
     let scriptContent = '';
+
     Object.keys(matchMap).forEach((filePath) => {
       const matches = matchMap[filePath];
 
+      // Start conditional statement of if for branch of href.
       scriptContent = scriptContent + 'if (';
 
+      // Does this contentscript have multiple match href?
       let isOr = false;
+
       matches.forEach((matchPattern) => {
         scriptContent =
           scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
@@ -163,6 +193,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
         isOr = true;
       });
 
+      // End conditional statement.
       scriptContent = scriptContent + ') {\n';
 
       if (jsBuildResultStore[filePath] !== undefined) {
@@ -171,6 +202,9 @@ export class WatchUserScript extends Watch implements WatchImplements {
         scriptContent = scriptContent + buildResultText;
       }
 
+      /**
+       * Inject style using DOM.
+       */
       if (cssResultStore[filePath] !== undefined) {
         const cssText = cssResultStore[filePath].toString();
         scriptContent =
@@ -182,12 +216,17 @@ export class WatchUserScript extends Watch implements WatchImplements {
           ].join('\n');
       }
 
+      // End if.
       scriptContent = scriptContent + '}\n\n';
     });
 
     return scriptContent;
   }
 
+  /**
+   * Marge userscript header, content script code and css inject code and output it.
+   * @param matchMap
+   */
   private outputFile(matchMap: Record<string, string[]>) {
     const contentScriptcode = this.generateContentScriptcode(
       matchMap,
@@ -204,6 +243,10 @@ export class WatchUserScript extends Watch implements WatchImplements {
     }
   }
 
+  /**
+   * Load content of css file selected by manifest.json and store it Buffer to this.cssResultStore.
+   * @param cssFilePaths
+   */
   private loadContentCssFiles(cssFilePaths: string[]) {
     cssFilePaths.forEach((cssFilePath, index) => {
       const fileName = path.basename(cssFilePath);

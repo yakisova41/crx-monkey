@@ -29,6 +29,9 @@ export class WatchPopup extends Watch implements WatchImplements {
         const root = this.getParser(popupHtml);
         this.loadRequestLocalResources(root);
 
+        /**
+         * Dispose watch of removed file.
+         */
         const removed = this.removeResourcesCheck();
 
         removed.forEach((removedFile) => {
@@ -46,6 +49,10 @@ export class WatchPopup extends Watch implements WatchImplements {
     }
   }
 
+  /**
+   * Watch scripts that loaded in popup html.
+   * @param popupPath
+   */
   private async watchLocalScripts(popupPath: string) {
     await Promise.all(
       Object.keys(this.requestLocalScripts).map(async (src) => {
@@ -84,6 +91,11 @@ export class WatchPopup extends Watch implements WatchImplements {
     );
   }
 
+  /**
+   * Get Html parser instance.
+   * @param htmlPath
+   * @returns
+   */
   private getParser(htmlPath: string) {
     const content = fse.readFileSync(htmlPath).toString();
     const root = parse(content);
@@ -91,6 +103,10 @@ export class WatchPopup extends Watch implements WatchImplements {
     return root;
   }
 
+  /**
+   * Load paths of local script loaded by popup html.
+   * @param root
+   */
   private loadRequestLocalResources(root: HTMLElement) {
     const scriptElems = root.querySelectorAll('script');
 
@@ -99,6 +115,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     scriptElems.forEach((elem) => {
       const src = elem.getAttribute('src');
       if (src !== undefined && src !== null) {
+        // Except the script href that start http.
         if (src.match('^http.*') === null) {
           requestLocalScripts[src] = elem;
         }
@@ -113,6 +130,10 @@ export class WatchPopup extends Watch implements WatchImplements {
     consola.info(`Popup script updated. | ${jsFilePath}`);
   }
 
+  /**
+   * Output html data in parser instance to dist.
+   * @param parserRoot
+   */
   private outputHTML(parserRoot: HTMLElement) {
     fse.outputFile(
       path.join(this.config.chromeOutputDir!, 'popup/popup.html'),
@@ -120,6 +141,10 @@ export class WatchPopup extends Watch implements WatchImplements {
     );
   }
 
+  /**
+   * Check to removed resouces.
+   * @returns
+   */
   private removeResourcesCheck() {
     const removedResources: string[] = [];
 

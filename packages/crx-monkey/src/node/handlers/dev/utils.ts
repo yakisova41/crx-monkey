@@ -12,6 +12,11 @@ export function getDevelopDir() {
   }
 }
 
+/**
+ * Generate code of injecting script using DOM.
+ * @param scriptContent
+ * @returns
+ */
 export function generateInjectScriptCode(scriptContent: string) {
   return [
     `const inject = ()=>{${scriptContent}}`,

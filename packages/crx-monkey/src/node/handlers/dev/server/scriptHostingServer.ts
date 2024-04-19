@@ -3,6 +3,9 @@ import { getConfig } from 'src/node/config';
 import path from 'path';
 import fse from 'fs-extra';
 
+/**
+ * The server of send to script code.
+ */
 export class ScriptHostingServer {
   private readonly app: express.Express;
   private readonly host: string;
@@ -14,6 +17,10 @@ export class ScriptHostingServer {
     this.port = port;
   }
 
+  /**
+   * Start server.
+   * @returns
+   */
   public async start() {
     this.setup();
     return new Promise((resolve) => {

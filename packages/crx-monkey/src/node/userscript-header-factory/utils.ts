@@ -1,5 +1,10 @@
 import fs from 'fs';
 
+/**
+ * Run_at in chrome extension manifest convert to runAt in userscript.
+ * @param chromeRunAt
+ * @returns
+ */
 export function convertChromeRunAtToUserJsRunAt(
   chromeRunAt: 'document_start' | 'document_end' | 'document_idle',
 ): 'document-start' | 'document-end' | 'document-idle' {
@@ -20,6 +25,11 @@ export function convertChromeRunAtToUserJsRunAt(
   }
 }
 
+/**
+ * Convert image to base64 string.
+ * @param imgPath Local image file path.
+ * @returns
+ */
 export function convertImgToBase64(imgPath: string) {
   const icon = fs.readFileSync(imgPath);
   const buf = Buffer.from(icon).toString('base64');
