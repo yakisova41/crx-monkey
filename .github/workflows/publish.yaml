@@ -1,0 +1,37 @@
+name: Crx monkey auto npm publish
+
+on:
+  release:
+    types: [published]
+
+env:
+  FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
+
+jobs:
+  publish:
+    name: Publish crx-monkey
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build crx-monkey
+        run: bun run build:crx
+
+      - name: Publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+        run: cd packages/crx-monkey
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
