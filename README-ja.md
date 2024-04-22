@@ -68,7 +68,7 @@ const config = {
   publicDir: './public',
   userScriptHeader: [
     ['@author', 'me'],
-    ['@grant', 'unsageWindow'],
+    ['@grant', 'unsafeWindow'],
   ],
   userscriptInjectPage: ['src/contentScript/contentScript.ts'],
 };
