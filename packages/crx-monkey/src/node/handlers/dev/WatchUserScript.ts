@@ -14,6 +14,7 @@ import { BuildResult } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
 import { ReloadServer } from './server/reloadServer';
+import prettier from 'prettier';
 
 export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -41,7 +42,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
     if (contentScripts !== undefined) {
       const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
-      const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
+      const { allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
       await this.headerRegister(allMatches);
 
@@ -51,7 +52,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
         jsFiles,
         (...args) => {
           this.watchJsOnBuild(...args);
-          this.outputFile(matchMap);
+          this.outputFile();
         },
         { write: false },
         () => {},
@@ -59,7 +60,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       this.watchByCssPaths(cssFiles, () => {
         this.loadContentCssFiles(cssFiles);
-        this.outputFile(matchMap);
+        this.outputFile();
       });
     }
   }
@@ -84,6 +85,8 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     if (this.manifest.run_at !== undefined) {
       this.headerFactory.push('@run-at', convertChromeRunAtToUserJsRunAt(this.manifest.run_at));
+    } else {
+      this.headerFactory.push('@run-at', 'document-start');
     }
 
     /**
@@ -163,6 +166,61 @@ export class WatchUserScript extends Watch implements WatchImplements {
   }
 
   /**
+   * Generate code contain functions for the build result of each file.
+   */
+  private generateBuildResultFuncCode(jsBuildResultStore: Record<string, Uint8Array>) {
+    let scriptContent = '';
+
+    Object.keys(jsBuildResultStore).forEach((filePath) => {
+      const content = jsBuildResultStore[filePath];
+
+      scriptContent =
+        scriptContent +
+        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
+          '\n',
+        );
+
+      const buildResultText = new TextDecoder().decode(content);
+
+      scriptContent = scriptContent + buildResultText;
+
+      scriptContent = scriptContent + '}\n\n';
+    });
+
+    return scriptContent;
+  }
+
+  /**
+   * Generate code contain functions for the css load result of each file.
+   */
+  private generateCssInjectFuncCode(cssResultStore: Record<string, Buffer>) {
+    let scriptContent = '';
+
+    Object.keys(cssResultStore).forEach((filePath) => {
+      const content = cssResultStore[filePath];
+
+      scriptContent =
+        scriptContent +
+        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
+          '\n',
+        );
+
+      const cssText = content.toString();
+      scriptContent =
+        scriptContent +
+        [
+          "const styleElement = document.createElement('style')",
+          `styleElement.innerHTML = \`${cssText}\`;`,
+          'document.head.appendChild(styleElement)',
+        ].join('\n');
+
+      scriptContent = scriptContent + '}\n\n';
+    });
+
+    return scriptContent;
+  }
+
+  /**
    * Build content scripts for each match and generate code to restrict execution for each match using if
    * @param matchMap
    * @param jsBuildResultStore
@@ -170,55 +228,67 @@ export class WatchUserScript extends Watch implements WatchImplements {
    * @returns
    */
   private generateContentScriptcode(
-    matchMap: Record<string, string[]>,
     jsBuildResultStore: Record<string, Uint8Array>,
     cssResultStore: Record<string, Buffer>,
   ) {
     // script result tmp.
     let scriptContent = '';
 
-    Object.keys(matchMap).forEach((filePath) => {
-      const matches = matchMap[filePath];
+    scriptContent = scriptContent + this.generateBuildResultFuncCode(jsBuildResultStore);
 
-      // Start conditional statement of if for branch of href.
-      scriptContent = scriptContent + 'if (';
+    scriptContent = scriptContent + this.generateCssInjectFuncCode(cssResultStore);
 
-      // Does this contentscript have multiple match href?
-      let isOr = false;
+    /**
+     * Run functions created for each item in the content script.
+     */
+    const contentScripts = this.manifest.content_scripts;
 
-      matches.forEach((matchPattern) => {
-        scriptContent =
-          scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
+    if (contentScripts !== undefined) {
+      contentScripts.forEach((contentScript) => {
+        const { matches, js, css } = contentScript;
 
-        isOr = true;
+        // Start conditional statement of if for branch of href.
+        if (matches !== undefined) {
+          scriptContent = scriptContent + 'if (';
+
+          // Does this contentscript have multiple match href?
+          let isOr = false;
+
+          matches.forEach((matchPattern) => {
+            scriptContent =
+              scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
+
+            isOr = true;
+          });
+
+          // End conditional statement.
+          scriptContent = scriptContent + ') {\n';
+        }
+
+        /**
+         * Code that executes the function corresponding to the file path.
+         */
+        if (js !== undefined) {
+          js.forEach((filePath) => {
+            scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
+          });
+        }
+
+        /**
+         * Code that executes the function injecting css corresponding to the file path.
+         */
+        if (css !== undefined) {
+          css.forEach((filePath) => {
+            scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
+          });
+        }
+
+        // End if.
+        if (matches !== undefined) {
+          scriptContent = scriptContent + '}\n\n';
+        }
       });
-
-      // End conditional statement.
-      scriptContent = scriptContent + ') {\n';
-
-      if (jsBuildResultStore[filePath] !== undefined) {
-        const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
-
-        scriptContent = scriptContent + buildResultText;
-      }
-
-      /**
-       * Inject style using DOM.
-       */
-      if (cssResultStore[filePath] !== undefined) {
-        const cssText = cssResultStore[filePath].toString();
-        scriptContent =
-          scriptContent +
-          [
-            "const styleElement = document.createElement('style')",
-            `styleElement.innerHTML = \`${cssText}\`;`,
-            'document.head.appendChild(styleElement)',
-          ].join('\n');
-      }
-
-      // End if.
-      scriptContent = scriptContent + '}\n\n';
-    });
+    }
 
     return scriptContent;
   }
@@ -227,9 +297,8 @@ export class WatchUserScript extends Watch implements WatchImplements {
    * Marge userscript header, content script code and css inject code and output it.
    * @param matchMap
    */
-  private outputFile(matchMap: Record<string, string[]>) {
+  private async outputFile() {
     const contentScriptcode = this.generateContentScriptcode(
-      matchMap,
       this.buildResultStore,
       this.cssResultStore,
     );
@@ -238,8 +307,10 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     const content = [headerCode, contentScriptcode].join('\n');
 
+    const formated = await prettier.format(content, { parser: 'babel' });
+
     if (this.config.userscriptOutput !== undefined) {
-      fse.outputFile(path.join(this.config.userscriptOutput), content);
+      fse.outputFile(path.join(this.config.userscriptOutput), formated);
     }
   }
 
@@ -256,5 +327,14 @@ export class WatchUserScript extends Watch implements WatchImplements {
       const result = fse.readFileSync(cssFilePath);
       this.cssResultStore[cssFilePath] = result;
     });
+  }
+
+  /**
+   * File path convert to base64 and it included "=" convert to "$".
+   * @param filePath
+   * @returns
+   */
+  private convertFilePathToFuncName(filePath: string) {
+    return btoa(filePath).replaceAll('=', '$');
   }
 }
