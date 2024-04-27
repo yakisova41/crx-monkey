@@ -14,6 +14,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import { Build, BuildImplements } from './Build';
 import { generateInjectScriptCode } from '../dev/utils';
+import prettier from 'prettier';
 
 export class BuildUserScript extends Build implements BuildImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -46,7 +47,7 @@ export class BuildUserScript extends Build implements BuildImplements {
     if (contentScripts !== undefined) {
       const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
 
-      const { matchMap, allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
+      const { allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
       const isExistInjectScripts = this.isIncludedInjectScripts(jsFiles);
 
@@ -58,12 +59,11 @@ export class BuildUserScript extends Build implements BuildImplements {
         jsFiles,
         (...args) => {
           this.buildJsOnBuild(...args);
-          this.outputFile(matchMap);
         },
         { write: false, logLevel: 'silent' },
       );
 
-      this.outputFile(matchMap);
+      await this.outputFile();
     }
   }
 
@@ -87,6 +87,8 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     if (this.manifest.run_at !== undefined) {
       this.headerFactory.push('@run-at', convertChromeRunAtToUserJsRunAt(this.manifest.run_at));
+    } else {
+      this.headerFactory.push('@run-at', 'document-start');
     }
 
     /**
@@ -176,66 +178,30 @@ export class BuildUserScript extends Build implements BuildImplements {
   }
 
   /**
-   * Build content scripts for each match and generate code to restrict execution for each match using the if syntax.
-   * @param matchMap
-   * @param jsBuildResultStore
-   * @param cssResultStore
-   * @returns
+   * Generate code contain functions for the build result of each file.
    */
-  private generateContentScriptcode(
-    matchMap: Record<string, string[]>,
-    jsBuildResultStore: Record<string, Uint8Array>,
-    cssResultStore: Record<string, Buffer>,
-  ) {
-    // script result tmp.
+  private generateBuildResultFuncCode(jsBuildResultStore: Record<string, Uint8Array>) {
     let scriptContent = '';
 
-    Object.keys(matchMap).forEach((filePath) => {
-      const matches = matchMap[filePath];
+    Object.keys(jsBuildResultStore).forEach((filePath) => {
+      const content = jsBuildResultStore[filePath];
 
-      // Start conditional statement of if for branch of href.
-      scriptContent = scriptContent + 'if (';
+      scriptContent =
+        scriptContent +
+        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
+          '\n',
+        );
 
-      // Does this contentscript have multiple match href?
-      let isOr = false;
+      const buildResultText = new TextDecoder().decode(content);
 
-      matches.forEach((matchPattern) => {
-        scriptContent =
-          scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
-
-        isOr = true;
-      });
-
-      // End conditional statement.
-      scriptContent = scriptContent + ') {\n';
-
-      if (jsBuildResultStore[filePath] !== undefined) {
-        const buildResultText = new TextDecoder().decode(jsBuildResultStore[filePath]);
-
-        if (this.config.userscriptInjectPage.includes(filePath)) {
-          // Inject script using DOM.
-          scriptContent = scriptContent + generateInjectScriptCode(buildResultText);
-        } else {
-          // Run script in userscript sandbox.
-          scriptContent = scriptContent + buildResultText;
-        }
+      if (this.config.userscriptInjectPage.includes(filePath)) {
+        // Inject script using DOM.
+        scriptContent = scriptContent + generateInjectScriptCode(buildResultText);
+      } else {
+        // Run script in userscript sandbox.
+        scriptContent = scriptContent + buildResultText;
       }
 
-      /**
-       * Inject style using DOM.
-       */
-      if (cssResultStore[filePath] !== undefined) {
-        const cssText = cssResultStore[filePath].toString();
-        scriptContent =
-          scriptContent +
-          [
-            "const styleElement = document.createElement('style')",
-            `styleElement.innerHTML = \`${cssText}\`;`,
-            'document.head.appendChild(styleElement)',
-          ].join('\n');
-      }
-
-      // End if.
       scriptContent = scriptContent + '}\n\n';
     });
 
@@ -243,12 +209,97 @@ export class BuildUserScript extends Build implements BuildImplements {
   }
 
   /**
-   * Marge userscript header, content script code and css inject code and output it.
-   * @param matchMap
+   * Generate code contain functions for the css load result of each file.
    */
-  private outputFile(matchMap: Record<string, string[]>) {
+  private generateCssInjectFuncCode(cssResultStore: Record<string, Buffer>) {
+    let scriptContent = '';
+
+    Object.keys(cssResultStore).forEach((filePath) => {
+      const content = cssResultStore[filePath];
+
+      scriptContent =
+        scriptContent +
+        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
+          '\n',
+        );
+
+      const cssText = content.toString();
+      scriptContent =
+        scriptContent +
+        [
+          "const styleElement = document.createElement('style')",
+          `styleElement.innerHTML = \`${cssText}\`;`,
+          'document.head.appendChild(styleElement)',
+        ].join('\n');
+
+      scriptContent = scriptContent + '}\n\n';
+    });
+
+    return scriptContent;
+  }
+
+  /**
+   * Build content scripts for each match and generate code to restrict execution for each match using the if syntax.
+   * @param matchMap
+   * @param jsBuildResultStore
+   * @param cssResultStore
+   * @returns
+   */
+  private generateContentScriptcode(
+    jsBuildResultStore: Record<string, Uint8Array>,
+    cssResultStore: Record<string, Buffer>,
+  ) {
+    // script result tmp.
+    let scriptContent = '';
+
+    scriptContent = scriptContent + this.generateBuildResultFuncCode(jsBuildResultStore);
+
+    scriptContent = scriptContent + this.generateCssInjectFuncCode(cssResultStore);
+
+    /**
+     * Run functions created for each item in the content script.
+     */
+    const contentScripts = this.manifest.content_scripts;
+
+    if (contentScripts !== undefined) {
+      contentScripts.forEach((contentScript) => {
+        const { matches, js, css, run_at } = contentScript;
+
+        // Start conditional statement of if for branch of href.
+        if (matches !== undefined) {
+          scriptContent = scriptContent + 'if (';
+
+          // Does this contentscript have multiple match href?
+          let isOr = false;
+
+          matches.forEach((matchPattern) => {
+            scriptContent =
+              scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
+
+            isOr = true;
+          });
+
+          // End conditional statement.
+          scriptContent = scriptContent + ') {\n';
+        }
+
+        scriptContent = scriptContent + this.generateCodeIncludingInjectTiming(run_at, js, css);
+
+        // End if.
+        if (matches !== undefined) {
+          scriptContent = scriptContent + '}\n\n';
+        }
+      });
+    }
+
+    return scriptContent;
+  }
+
+  /**
+   * Marge userscript header, content script code and css inject code and output it.
+   */
+  private async outputFile() {
     const contentScriptcode = this.generateContentScriptcode(
-      matchMap,
       this.buildResultStore,
       this.cssResultStore,
     );
@@ -257,8 +308,10 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     const content = [headerCode, contentScriptcode].join('\n');
 
+    const formated = await prettier.format(content, { parser: 'babel' });
+
     if (this.config.userscriptOutput !== undefined) {
-      fse.outputFile(path.join(this.config.userscriptOutput), content);
+      fse.outputFile(path.join(this.config.userscriptOutput), formated);
     }
   }
 
@@ -292,5 +345,77 @@ export class BuildUserScript extends Build implements BuildImplements {
     });
 
     return result;
+  }
+
+  /**
+   * File path convert to base64 and it included "=" convert to "$".
+   * @param filePath
+   * @returns
+   */
+  private convertFilePathToFuncName(filePath: string) {
+    return btoa(filePath).replaceAll('=', '$');
+  }
+
+  /**
+   * Generate code containing code to control timing of inject.
+   * @param run_at
+   * @param js
+   * @param css
+   * @returns
+   */
+  private generateCodeIncludingInjectTiming(
+    run_at: string | undefined,
+    js: string[] | undefined,
+    css: string[] | undefined,
+  ) {
+    const syntaxs = {
+      document_end: {
+        start: "document.addEventListener('DOMContentLoaded', () => {",
+        end: '});',
+      },
+      document_idle: {
+        start: "document.addEventListener('DOMContentLoaded', () => {setTimeout(() => {",
+        end: '}, 1)});',
+      },
+    };
+
+    let scriptContent = '';
+    const runAt = run_at === undefined ? 'document_end' : run_at;
+
+    if (runAt === 'document_end') {
+      scriptContent = scriptContent + syntaxs['document_end'].start;
+    }
+
+    if (runAt === 'document_idle') {
+      scriptContent = scriptContent + syntaxs['document_idle'].start;
+    }
+
+    /**
+     * Code that executes the function corresponding to the file path.
+     */
+    if (js !== undefined) {
+      js.forEach((filePath) => {
+        scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
+      });
+    }
+
+    /**
+     * Code that executes the function injecting css corresponding to the file path.
+     */
+    if (css !== undefined) {
+      css.forEach((filePath) => {
+        scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
+      });
+    }
+
+    if (runAt === 'document_end') {
+      scriptContent = scriptContent + syntaxs['document_end'].end;
+    }
+
+    if (runAt === 'document_idle') {
+      scriptContent = scriptContent + syntaxs['document_idle'].end;
+    }
+
+    return scriptContent;
   }
 }
