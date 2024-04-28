@@ -15,6 +15,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import { ReloadServer } from './server/reloadServer';
 import prettier from 'prettier';
+import { UsersScript } from '../UserScript';
 
 export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -245,25 +246,12 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css } = contentScript;
+        const { matches, js, css, exclude_matches } = contentScript;
 
         // Start conditional statement of if for branch of href.
-        if (matches !== undefined) {
-          scriptContent = scriptContent + 'if (';
-
-          // Does this contentscript have multiple match href?
-          let isOr = false;
-
-          matches.forEach((matchPattern) => {
-            scriptContent =
-              scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
-
-            isOr = true;
-          });
-
-          // End conditional statement.
-          scriptContent = scriptContent + ') {\n';
-        }
+        scriptContent =
+          scriptContent +
+          UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
 
         /**
          * Code that executes the function corresponding to the file path.

@@ -15,6 +15,7 @@ import path from 'path';
 import { Build, BuildImplements } from './Build';
 import { generateInjectScriptCode } from '../dev/utils';
 import prettier from 'prettier';
+import { UsersScript } from '../UserScript';
 
 export class BuildUserScript extends Build implements BuildImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -263,25 +264,12 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, run_at } = contentScript;
+        const { matches, js, css, run_at, exclude_matches } = contentScript;
 
         // Start conditional statement of if for branch of href.
-        if (matches !== undefined) {
-          scriptContent = scriptContent + 'if (';
-
-          // Does this contentscript have multiple match href?
-          let isOr = false;
-
-          matches.forEach((matchPattern) => {
-            scriptContent =
-              scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
-
-            isOr = true;
-          });
-
-          // End conditional statement.
-          scriptContent = scriptContent + ') {\n';
-        }
+        scriptContent =
+          scriptContent +
+          UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
 
         scriptContent = scriptContent + this.generateCodeIncludingInjectTiming(run_at, js, css);
 
