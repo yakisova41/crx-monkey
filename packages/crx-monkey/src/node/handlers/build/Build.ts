@@ -1,3 +1,4 @@
+import consola from 'consola';
 import { BuildOptions, BuildResult, Plugin, build } from 'esbuild';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
@@ -14,7 +15,7 @@ export class Build {
 
     const config = getConfig();
     if (config === undefined) {
-      throw new Error(['Config is undefined.'].join('\n'));
+      throw consola.error(new Error('Config is undefined.'));
     }
     this.config = config;
   }

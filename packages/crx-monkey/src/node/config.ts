@@ -1,6 +1,7 @@
 import { promises } from 'fs';
 import { CrxMonkeyConfig } from './types';
 import path from 'path';
+import consola from 'consola';
 
 const configFileNameMatch = ['crx-monkey.config.js'];
 
@@ -18,6 +19,10 @@ const defaultConfig: CrxMonkeyConfig = {
   userScriptHeader: [],
   importIconToUsercript: false,
   userscriptInjectPage: [],
+  prettier: {
+    format: true,
+    options: { parser: 'babel' },
+  },
 };
 
 /**
@@ -34,11 +39,7 @@ async function getConfigPath(): Promise<string | null> {
       } else {
         const splited = dir.split('/');
         if (splited.length === 1) {
-          reject(
-            new Error(
-              ['Config file not found.', 'Please create "crx-monkey-config.js"'].join('\n'),
-            ),
-          );
+          reject(new Error('Config file not found. Please create "crx-monkey-config.js"'));
         } else {
           splited.pop();
           dir = splited.join('/');
@@ -130,11 +131,11 @@ export async function loadConfig(): Promise<CrxMonkeyConfig> {
             resolve(configCahce);
           });
         } else {
-          throw new Error('Can not import config');
+          throw consola.error(new Error('Can not import config'));
         }
       })
       .catch((e) => {
-        throw e;
+        throw consola.error(e);
       });
   });
 }
@@ -148,6 +149,6 @@ export function getConfig() {
   if (configCahce !== null) {
     return configCahce;
   } else {
-    throw new Error('Config has not been loaded. Please using "loadConfig()"');
+    throw consola.error(new Error('Config has not been loaded. Please using "loadConfig()"'));
   }
 }

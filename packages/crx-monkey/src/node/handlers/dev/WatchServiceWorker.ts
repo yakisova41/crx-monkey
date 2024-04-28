@@ -51,9 +51,6 @@ function devServiceWorkerPlugin(config: CrxMonkeyConfig) {
     name: 'dev-sw-plugin',
     setup: (build) => {
       const { devServer } = config;
-      if (devServer === undefined) {
-        throw new Error('');
-      }
 
       build.onEnd((res) => {
         const meta = res.metafile;

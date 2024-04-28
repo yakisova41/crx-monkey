@@ -15,6 +15,8 @@ import fse from 'fs-extra';
 import path from 'path';
 import { ReloadServer } from './server/reloadServer';
 import prettier from 'prettier';
+import { UsersScript } from '../UserScript';
+import consola from 'consola';
 
 export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -34,10 +36,6 @@ export class WatchUserScript extends Watch implements WatchImplements {
   }
 
   public async watch() {
-    if (this.config.devServer === undefined) {
-      throw new Error('Dev Server is not enabled');
-    }
-
     const contentScripts = this.manifest.content_scripts;
     if (contentScripts !== undefined) {
       const { jsFiles, cssFiles } = getAllJsAndCSSByContentScripts(contentScripts);
@@ -144,14 +142,13 @@ export class WatchUserScript extends Watch implements WatchImplements {
           const base64 = convertImgToBase64(iconPath);
           this.headerFactory.push('@icon', base64);
         } else {
-          throw new Error('No size 48 icons were found in the icons item');
+          throw consola.error(new Error('No size 48 icons were found in the icons item'));
         }
       } else {
-        throw new Error(
-          [
-            'No "icons" entry found in manifest',
-            'Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest',
-          ].join('\n'),
+        throw consola.error(
+          new Error(
+            'No "icons" entry found in manifest. Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest.',
+          ),
         );
       }
     }
@@ -176,9 +173,11 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const buildResultText = new TextDecoder().decode(content);
 
@@ -201,9 +200,11 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const cssText = content.toString();
       scriptContent =
@@ -245,43 +246,16 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css } = contentScript;
+        const { matches, js, css, exclude_matches } = contentScript;
 
         // Start conditional statement of if for branch of href.
-        if (matches !== undefined) {
-          scriptContent = scriptContent + 'if (';
+        scriptContent =
+          scriptContent +
+          UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
 
-          // Does this contentscript have multiple match href?
-          let isOr = false;
-
-          matches.forEach((matchPattern) => {
-            scriptContent =
-              scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
-
-            isOr = true;
-          });
-
-          // End conditional statement.
-          scriptContent = scriptContent + ') {\n';
-        }
-
-        /**
-         * Code that executes the function corresponding to the file path.
-         */
-        if (js !== undefined) {
-          js.forEach((filePath) => {
-            scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-          });
-        }
-
-        /**
-         * Code that executes the function injecting css corresponding to the file path.
-         */
-        if (css !== undefined) {
-          css.forEach((filePath) => {
-            scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-          });
-        }
+        // run_at is always document_start when dev mode.
+        scriptContent =
+          scriptContent + UsersScript.generateCodeIncludingInjectTiming('document_start', js, css);
 
         // End if.
         if (matches !== undefined) {
@@ -307,10 +281,19 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     const content = [headerCode, contentScriptcode].join('\n');
 
-    const formated = await prettier.format(content, { parser: 'babel' });
+    const { format, options } = this.config.prettier;
 
     if (this.config.userscriptOutput !== undefined) {
-      fse.outputFile(path.join(this.config.userscriptOutput), formated);
+      if (format) {
+        if (options === undefined) {
+          throw consola.error(new Error('Prettier options in crx-monkey.config.js is Undefined.'));
+        }
+
+        const formated = await prettier.format(content, options);
+        fse.outputFile(path.join(this.config.userscriptOutput), formated);
+      } else {
+        fse.outputFile(path.join(this.config.userscriptOutput), content);
+      }
     }
   }
 
@@ -327,14 +310,5 @@ export class WatchUserScript extends Watch implements WatchImplements {
       const result = fse.readFileSync(cssFilePath);
       this.cssResultStore[cssFilePath] = result;
     });
-  }
-
-  /**
-   * File path convert to base64 and it included "=" convert to "$".
-   * @param filePath
-   * @returns
-   */
-  private convertFilePathToFuncName(filePath: string) {
-    return btoa(filePath).replaceAll('=', '$');
   }
 }

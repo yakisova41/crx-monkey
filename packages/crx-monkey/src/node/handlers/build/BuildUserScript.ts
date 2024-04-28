@@ -15,6 +15,8 @@ import path from 'path';
 import { Build, BuildImplements } from './Build';
 import { generateInjectScriptCode } from '../dev/utils';
 import prettier from 'prettier';
+import { UsersScript } from '../UserScript';
+import consola from 'consola';
 
 export class BuildUserScript extends Build implements BuildImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -35,10 +37,6 @@ export class BuildUserScript extends Build implements BuildImplements {
    * Build userscript
    */
   public async build() {
-    if (this.config.devServer === undefined) {
-      throw new Error('Dev Server is not enabled');
-    }
-
     /**
      * Build and output content scripts.
      */
@@ -156,14 +154,13 @@ export class BuildUserScript extends Build implements BuildImplements {
           const base64 = convertImgToBase64(iconPath);
           this.headerFactory.push('@icon', base64);
         } else {
-          throw new Error('No size 48 icons were found in the icons item');
+          throw consola.error(new Error('No size 48 icons were found in the icons item'));
         }
       } else {
-        throw new Error(
-          [
-            'No "icons" entry found in manifest',
-            'Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest',
-          ].join('\n'),
+        throw consola.error(
+          new Error(
+            'No "icons" entry found in manifest. Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest.',
+          ),
         );
       }
     }
@@ -188,9 +185,11 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const buildResultText = new TextDecoder().decode(content);
 
@@ -219,9 +218,11 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const cssText = content.toString();
       scriptContent =
@@ -263,27 +264,15 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, run_at } = contentScript;
+        const { matches, js, css, run_at, exclude_matches } = contentScript;
 
         // Start conditional statement of if for branch of href.
-        if (matches !== undefined) {
-          scriptContent = scriptContent + 'if (';
+        scriptContent =
+          scriptContent +
+          UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
 
-          // Does this contentscript have multiple match href?
-          let isOr = false;
-
-          matches.forEach((matchPattern) => {
-            scriptContent =
-              scriptContent + `${isOr ? ' ||' : ''}location.href.match('${matchPattern}') !== null`;
-
-            isOr = true;
-          });
-
-          // End conditional statement.
-          scriptContent = scriptContent + ') {\n';
-        }
-
-        scriptContent = scriptContent + this.generateCodeIncludingInjectTiming(run_at, js, css);
+        scriptContent =
+          scriptContent + UsersScript.generateCodeIncludingInjectTiming(run_at, js, css);
 
         // End if.
         if (matches !== undefined) {
@@ -308,10 +297,19 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     const content = [headerCode, contentScriptcode].join('\n');
 
-    const formated = await prettier.format(content, { parser: 'babel' });
+    const { format, options } = this.config.prettier;
 
     if (this.config.userscriptOutput !== undefined) {
-      fse.outputFile(path.join(this.config.userscriptOutput), formated);
+      if (format) {
+        if (options === undefined) {
+          throw consola.error(new Error('Prettier options in crx-monkey.config.js is Undefined.'));
+        }
+
+        const formated = await prettier.format(content, options);
+        fse.outputFile(path.join(this.config.userscriptOutput), formated);
+      } else {
+        fse.outputFile(path.join(this.config.userscriptOutput), content);
+      }
     }
   }
 
@@ -345,77 +343,5 @@ export class BuildUserScript extends Build implements BuildImplements {
     });
 
     return result;
-  }
-
-  /**
-   * File path convert to base64 and it included "=" convert to "$".
-   * @param filePath
-   * @returns
-   */
-  private convertFilePathToFuncName(filePath: string) {
-    return btoa(filePath).replaceAll('=', '$');
-  }
-
-  /**
-   * Generate code containing code to control timing of inject.
-   * @param run_at
-   * @param js
-   * @param css
-   * @returns
-   */
-  private generateCodeIncludingInjectTiming(
-    run_at: string | undefined,
-    js: string[] | undefined,
-    css: string[] | undefined,
-  ) {
-    const syntaxs = {
-      document_end: {
-        start: "document.addEventListener('DOMContentLoaded', () => {",
-        end: '});',
-      },
-      document_idle: {
-        start: "document.addEventListener('DOMContentLoaded', () => {setTimeout(() => {",
-        end: '}, 1)});',
-      },
-    };
-
-    let scriptContent = '';
-    const runAt = run_at === undefined ? 'document_end' : run_at;
-
-    if (runAt === 'document_end') {
-      scriptContent = scriptContent + syntaxs['document_end'].start;
-    }
-
-    if (runAt === 'document_idle') {
-      scriptContent = scriptContent + syntaxs['document_idle'].start;
-    }
-
-    /**
-     * Code that executes the function corresponding to the file path.
-     */
-    if (js !== undefined) {
-      js.forEach((filePath) => {
-        scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-      });
-    }
-
-    /**
-     * Code that executes the function injecting css corresponding to the file path.
-     */
-    if (css !== undefined) {
-      css.forEach((filePath) => {
-        scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-      });
-    }
-
-    if (runAt === 'document_end') {
-      scriptContent = scriptContent + syntaxs['document_end'].end;
-    }
-
-    if (runAt === 'document_idle') {
-      scriptContent = scriptContent + syntaxs['document_idle'].end;
-    }
-
-    return scriptContent;
   }
 }
