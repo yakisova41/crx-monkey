@@ -16,6 +16,7 @@ import path from 'path';
 import { ReloadServer } from './server/reloadServer';
 import prettier from 'prettier';
 import { UsersScript } from '../UserScript';
+import consola from 'consola';
 
 export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -285,10 +286,19 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     const content = [headerCode, contentScriptcode].join('\n');
 
-    const formated = await prettier.format(content, { parser: 'babel' });
+    const { format, options } = this.config.prettier;
 
     if (this.config.userscriptOutput !== undefined) {
-      fse.outputFile(path.join(this.config.userscriptOutput), formated);
+      if (format) {
+        if (options === undefined) {
+          throw consola.error(new Error('Prettier options in crx-monkey.config.js is Undefined.'));
+        }
+
+        const formated = await prettier.format(content, options);
+        fse.outputFile(path.join(this.config.userscriptOutput), formated);
+      } else {
+        fse.outputFile(path.join(this.config.userscriptOutput), content);
+      }
     }
   }
 

@@ -18,6 +18,10 @@ const defaultConfig: CrxMonkeyConfig = {
   userScriptHeader: [],
   importIconToUsercript: false,
   userscriptInjectPage: [],
+  prettier: {
+    format: true,
+    options: { parser: 'babel' },
+  },
 };
 
 /**

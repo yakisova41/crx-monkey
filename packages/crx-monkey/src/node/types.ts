@@ -1,4 +1,5 @@
 import { BuildOptions } from 'esbuild';
+import { Options } from 'prettier';
 
 export interface CrxMonkeyConfig {
   manifestJsonPath: string;
@@ -14,6 +15,12 @@ export interface CrxMonkeyConfig {
   userScriptHeader: UserScriptHeader;
   importIconToUsercript: boolean;
   userscriptInjectPage: string[];
+  prettier: CrxPrettierOptions;
+}
+
+export interface CrxPrettierOptions {
+  format: boolean;
+  options: Options;
 }
 
 export type NonLoadedCrxMonkeyConfig = {
