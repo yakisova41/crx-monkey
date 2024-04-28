@@ -2,6 +2,7 @@ import fsExtra from 'fs-extra/esm';
 import fs from 'fs';
 import path from 'path';
 import { getlocalesPath } from '../handlers/utils';
+import consola from 'consola';
 
 /**
  * Enumerate all js and css paths from conetnt_scripts in manifestjson
@@ -131,9 +132,7 @@ async function getMessage(langKey: string, key: string) {
   if (message !== undefined) {
     return message;
   } else {
-    throw new Error(
-      ['Can not found message property', `lang: ${langKey}`, `key: ${key}`].join('\n'),
-    );
+    throw consola.error(new Error(`Can not found message property. lang: ${langKey} key: ${key}`));
   }
 }
 
@@ -147,7 +146,7 @@ function getEnableLangs(localesPath: string) {
   const langs = fs.readdirSync(localesPath);
 
   if (!langs.includes('en')) {
-    throw new Error('No en in _locales folder');
+    throw consola.error(new Error('There is no en directory in the _locales directory.'));
   }
 
   return langs;

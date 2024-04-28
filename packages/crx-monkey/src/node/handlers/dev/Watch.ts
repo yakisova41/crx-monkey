@@ -4,6 +4,7 @@ import { ManifestFactory } from 'src/node/manifest-factory';
 import { CrxMonkeyConfig } from 'src/node/types';
 import chokidar from 'chokidar';
 import { ReloadServer } from './server/reloadServer';
+import consola from 'consola';
 
 export class Watch {
   protected readonly manifest: chrome.runtime.ManifestV3;
@@ -22,7 +23,7 @@ export class Watch {
 
     const config = getConfig();
     if (config === undefined) {
-      throw new Error(['Config is undefined.'].join('\n'));
+      throw consola.error(new Error('Config is undefined.'));
     }
     this.config = config;
   }

@@ -37,10 +37,6 @@ export class BuildUserScript extends Build implements BuildImplements {
    * Build userscript
    */
   public async build() {
-    if (this.config.devServer === undefined) {
-      throw new Error('Dev Server is not enabled');
-    }
-
     /**
      * Build and output content scripts.
      */
@@ -158,14 +154,13 @@ export class BuildUserScript extends Build implements BuildImplements {
           const base64 = convertImgToBase64(iconPath);
           this.headerFactory.push('@icon', base64);
         } else {
-          throw new Error('No size 48 icons were found in the icons item');
+          throw consola.error(new Error('No size 48 icons were found in the icons item'));
         }
       } else {
-        throw new Error(
-          [
-            'No "icons" entry found in manifest',
-            'Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest',
-          ].join('\n'),
+        throw consola.error(
+          new Error(
+            'No "icons" entry found in manifest. Disable the "importIconToUserscript" entry in the config file or add an "icons" entry to manifest.',
+          ),
         );
       }
     }
