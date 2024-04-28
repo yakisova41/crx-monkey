@@ -71,6 +71,10 @@ const config = {
     ['@grant', 'unsafeWindow'],
   ],
   userscriptInjectPage: ['src/contentScript/contentScript.ts'],
+  prettier: {
+    format: true,
+    options: { parser: 'babel' },
+  },
 };
 
 export default config;
@@ -126,3 +130,14 @@ publicフォルダーのディレクトリパスを指定できます。
 ### userscriptInjectPage
 
 userscriptとして読み込む際にunsafeWindowからアクセスしたbodyへ直接scriptタグを使用して挿入するcontentscriptを指定できます。
+
+### prettier
+
+```js
+prettier: {
+  format: true, // フォーマットを実行するか？
+  options: { parser: 'babel' },
+},
+```
+
+Userscriptビルド後に実行する[Prettier](https://github.com/prettier/prettier)を使用したフォーマットを構成します。
