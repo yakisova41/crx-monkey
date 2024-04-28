@@ -73,6 +73,10 @@ const config = {
     ['@grant', 'unsafeWindow'],
   ],
   userscriptInjectPage: ['src/contentScript/contentScript.ts'],
+  prettier: {
+    format: true,
+    options: { parser: 'babel' },
+  },
 };
 
 export default config;
@@ -126,3 +130,14 @@ Convert the 48-pixel icon specified in the `manifest.json` to base64 and set it 
 ### userscriptInjectPage
 
 You can specify the contentscript to be inserted using a script tag directly into the body accessed from the unsafeWindow when loading as a userscript.
+
+### prettier
+
+```js
+prettier: {
+  format: true, // フォーマットを実行するか？
+  options: { parser: 'babel' },
+},
+```
+
+Change the formatting configuration using [Prettier](https://github.com/prettier/prettier), which is performed after the Userscript build.
