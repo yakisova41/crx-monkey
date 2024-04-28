@@ -1,7 +1,7 @@
 {
   "name": "crx-monkey",
   "type": "module",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "",
   "bin": {
     "crx-monkey": "bin/crx-monkey"
@@ -14,6 +14,11 @@
   },
   "author": "yakisova41 <yakisoba5emon@gmail.com> (https://yakisova.com/)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yakisova41/crx-monkey.git",
+    "directory": "packages/crx-monkey"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
