@@ -189,9 +189,11 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const buildResultText = new TextDecoder().decode(content);
 
@@ -220,9 +222,11 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const cssText = content.toString();
       scriptContent =
@@ -271,7 +275,8 @@ export class BuildUserScript extends Build implements BuildImplements {
           scriptContent +
           UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
 
-        scriptContent = scriptContent + this.generateCodeIncludingInjectTiming(run_at, js, css);
+        scriptContent =
+          scriptContent + UsersScript.generateCodeIncludingInjectTiming(run_at, js, css);
 
         // End if.
         if (matches !== undefined) {
@@ -333,77 +338,5 @@ export class BuildUserScript extends Build implements BuildImplements {
     });
 
     return result;
-  }
-
-  /**
-   * File path convert to base64 and it included "=" convert to "$".
-   * @param filePath
-   * @returns
-   */
-  private convertFilePathToFuncName(filePath: string) {
-    return btoa(filePath).replaceAll('=', '$');
-  }
-
-  /**
-   * Generate code containing code to control timing of inject.
-   * @param run_at
-   * @param js
-   * @param css
-   * @returns
-   */
-  private generateCodeIncludingInjectTiming(
-    run_at: string | undefined,
-    js: string[] | undefined,
-    css: string[] | undefined,
-  ) {
-    const syntaxs = {
-      document_end: {
-        start: "document.addEventListener('DOMContentLoaded', () => {",
-        end: '});',
-      },
-      document_idle: {
-        start: "document.addEventListener('DOMContentLoaded', () => {setTimeout(() => {",
-        end: '}, 1)});',
-      },
-    };
-
-    let scriptContent = '';
-    const runAt = run_at === undefined ? 'document_end' : run_at;
-
-    if (runAt === 'document_end') {
-      scriptContent = scriptContent + syntaxs['document_end'].start;
-    }
-
-    if (runAt === 'document_idle') {
-      scriptContent = scriptContent + syntaxs['document_idle'].start;
-    }
-
-    /**
-     * Code that executes the function corresponding to the file path.
-     */
-    if (js !== undefined) {
-      js.forEach((filePath) => {
-        scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-      });
-    }
-
-    /**
-     * Code that executes the function injecting css corresponding to the file path.
-     */
-    if (css !== undefined) {
-      css.forEach((filePath) => {
-        scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-      });
-    }
-
-    if (runAt === 'document_end') {
-      scriptContent = scriptContent + syntaxs['document_end'].end;
-    }
-
-    if (runAt === 'document_idle') {
-      scriptContent = scriptContent + syntaxs['document_idle'].end;
-    }
-
-    return scriptContent;
   }
 }

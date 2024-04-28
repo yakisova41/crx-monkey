@@ -177,9 +177,11 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const buildResultText = new TextDecoder().decode(content);
 
@@ -202,9 +204,11 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       scriptContent =
         scriptContent +
-        ['', `// ${filePath}`, `function ${this.convertFilePathToFuncName(filePath)}() {`].join(
-          '\n',
-        );
+        [
+          '',
+          `// ${filePath}`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+        ].join('\n');
 
       const cssText = content.toString();
       scriptContent =
@@ -253,23 +257,9 @@ export class WatchUserScript extends Watch implements WatchImplements {
           scriptContent +
           UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
 
-        /**
-         * Code that executes the function corresponding to the file path.
-         */
-        if (js !== undefined) {
-          js.forEach((filePath) => {
-            scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-          });
-        }
-
-        /**
-         * Code that executes the function injecting css corresponding to the file path.
-         */
-        if (css !== undefined) {
-          css.forEach((filePath) => {
-            scriptContent = scriptContent + `${this.convertFilePathToFuncName(filePath)}();\n`;
-          });
-        }
+        // run_at is always document_start when dev mode.
+        scriptContent =
+          scriptContent + UsersScript.generateCodeIncludingInjectTiming('document_start', js, css);
 
         // End if.
         if (matches !== undefined) {
@@ -315,14 +305,5 @@ export class WatchUserScript extends Watch implements WatchImplements {
       const result = fse.readFileSync(cssFilePath);
       this.cssResultStore[cssFilePath] = result;
     });
-  }
-
-  /**
-   * File path convert to base64 and it included "=" convert to "$".
-   * @param filePath
-   * @returns
-   */
-  private convertFilePathToFuncName(filePath: string) {
-    return btoa(filePath).replaceAll('=', '$');
   }
 }
