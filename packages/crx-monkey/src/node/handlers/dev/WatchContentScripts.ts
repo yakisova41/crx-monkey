@@ -4,8 +4,25 @@ import fse from 'fs-extra';
 import path from 'path';
 import { getAllJsAndCSSByContentScripts } from 'src/node/manifest-factory/utils';
 import consola from 'consola';
+import { CrxMonkeyContentScripts, CrxMonkeyManifest } from 'src/node/types';
+import { loadStaticFile } from 'src/node/static/main';
+import { ReloadServer } from './server/reloadServer';
+import { ManifestFactory } from 'src/node/manifest-factory';
+import { defineCrxContentBuildIdPlugin } from '../utils';
 
 export class WatchContentScripts extends Watch implements WatchImplements {
+  private readonly crxContentBuildId: string;
+
+  constructor(
+    manifest: CrxMonkeyManifest,
+    manifestFactory: ManifestFactory,
+    reloadServer: ReloadServer,
+  ) {
+    super(manifest, manifestFactory, reloadServer);
+
+    this.crxContentBuildId = crypto.randomUUID();
+  }
+
   public async watch(): Promise<void> {
     const contentScripts = this.manifest.content_scripts;
 
@@ -21,6 +38,7 @@ export class WatchContentScripts extends Watch implements WatchImplements {
         },
         {},
         this.watchJsOnFirstBuild.bind(this),
+        [defineCrxContentBuildIdPlugin(this.crxContentBuildId)],
       );
 
       this.watchByCssPaths(cssFiles, (cssPath) => {
@@ -30,6 +48,8 @@ export class WatchContentScripts extends Watch implements WatchImplements {
 
         this.copyCssFiles(cssFiles);
       });
+
+      this.setupIsolateConnector(contentScripts);
     }
   }
 
@@ -63,5 +83,37 @@ export class WatchContentScripts extends Watch implements WatchImplements {
 
       this.manifestFactory.resolveContentScript('css', cssFilePath, outPutFilename);
     });
+  }
+
+  /**
+   * Connector for clients to bypass chrome runtime
+   * @param contentScripts
+   */
+  private setupIsolateConnector(contentScripts: CrxMonkeyContentScripts) {
+    const connectorFilename = 'crx-monkey-isolate-connector.js';
+    const connectorPath = path.join(this.config.chromeOutputDir!, connectorFilename);
+
+    let includeConnector = false;
+    const matches: string[] = [];
+
+    contentScripts.forEach((contentScript) => {
+      if (contentScript.connection_isolated) {
+        matches.push(...(contentScript.matches !== undefined ? contentScript.matches : []));
+        includeConnector = true;
+      }
+    });
+
+    if (includeConnector) {
+      const connectorContent = loadStaticFile(
+        path.join(import.meta.dirname, './static/isolateConnector.js'),
+        {
+          crxContentBuildId: this.crxContentBuildId,
+        },
+      );
+
+      fse.outputFile(connectorPath, connectorContent);
+
+      this.manifestFactory.addContentScript([connectorFilename], [], matches, 'ISOLATED');
+    }
   }
 }

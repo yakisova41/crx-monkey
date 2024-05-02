@@ -1,19 +1,19 @@
 import { BuildContext, BuildOptions, BuildResult, Plugin, build, context } from 'esbuild';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
-import { CrxMonkeyConfig } from 'src/node/types';
+import { CrxMonkeyConfig, CrxMonkeyManifest } from 'src/node/types';
 import chokidar from 'chokidar';
 import { ReloadServer } from './server/reloadServer';
 import consola from 'consola';
 
 export class Watch {
-  protected readonly manifest: chrome.runtime.ManifestV3;
+  protected readonly manifest: CrxMonkeyManifest;
   protected readonly manifestFactory: ManifestFactory;
   protected readonly config: CrxMonkeyConfig;
   protected readonly reloadServer: ReloadServer;
 
   constructor(
-    manifest: chrome.runtime.ManifestV3,
+    manifest: CrxMonkeyManifest,
     manifestFactory: ManifestFactory,
     reloadServer: ReloadServer,
   ) {

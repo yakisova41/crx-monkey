@@ -3,8 +3,20 @@ import { Build, BuildImplements } from './Build';
 import path from 'path';
 import fse from 'fs-extra';
 import manifestPlugin from 'esbuild-plugin-manifest';
+import { defineCrxContentBuildIdPlugin } from '../utils';
+import { CrxMonkeyContentScripts, CrxMonkeyManifest } from 'src/node/types';
+import { ManifestFactory } from 'src/node/manifest-factory';
+import { loadStaticFile } from 'src/node/static/main';
 
 export class BuildContentScript extends Build implements BuildImplements {
+  private readonly crxContentBuildId: string;
+
+  constructor(manifest: CrxMonkeyManifest, manifestFactory: ManifestFactory) {
+    super(manifest, manifestFactory);
+
+    this.crxContentBuildId = crypto.randomUUID();
+  }
+
   public async build(): Promise<void> {
     const contentScripts = this.manifest.content_scripts;
 
@@ -25,8 +37,10 @@ export class BuildContentScript extends Build implements BuildImplements {
           }
         },
         { logLevel: 'info' },
-        [manifestPlugin()],
+        [manifestPlugin(), defineCrxContentBuildIdPlugin(this.crxContentBuildId)],
       );
+
+      this.setupIsolateConnector(contentScripts);
     }
   }
 
@@ -45,5 +59,37 @@ export class BuildContentScript extends Build implements BuildImplements {
 
       this.manifestFactory.resolveContentScript('css', cssFilePath, outPutFilename);
     });
+  }
+
+  /**
+   * Connector for clients to bypass chrome runtime
+   * @param contentScripts
+   */
+  private setupIsolateConnector(contentScripts: CrxMonkeyContentScripts) {
+    const connectorFilename = 'crx-monkey-isolate-connector.js';
+    const connectorPath = path.join(this.config.chromeOutputDir!, connectorFilename);
+
+    let includeConnector = false;
+    const matches: string[] = [];
+
+    contentScripts.forEach((contentScript) => {
+      if (contentScript.connection_isolated) {
+        matches.push(...(contentScript.matches !== undefined ? contentScript.matches : []));
+        includeConnector = true;
+      }
+    });
+
+    if (includeConnector) {
+      const connectorContent = loadStaticFile(
+        path.join(import.meta.dirname, './static/isolateConnector.js'),
+        {
+          crxContentBuildId: this.crxContentBuildId,
+        },
+      );
+
+      fse.outputFile(connectorPath, connectorContent);
+
+      this.manifestFactory.addContentScript([connectorFilename], [], matches, 'ISOLATED');
+    }
   }
 }

@@ -32,12 +32,18 @@ export class ManifestFactory {
     };
   }
 
-  public addContentScript(js: string[], css: string[], matches: string[]) {
+  public addContentScript(
+    js: string[],
+    css: string[],
+    matches: string[],
+    world: 'MAIN' | 'ISOLATED' = 'ISOLATED',
+  ) {
     if (this.workspace.content_scripts !== undefined) {
       this.workspace.content_scripts.push({
         matches,
         js,
         css,
+        world,
       });
     }
   }

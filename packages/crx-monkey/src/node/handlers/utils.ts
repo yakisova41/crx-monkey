@@ -1,6 +1,7 @@
 import { getConfig } from '../config';
 import path from 'path';
 import fse from 'fs-extra';
+import { Plugin } from 'esbuild';
 
 /**
  * Copy the locales dir to dist.
@@ -39,4 +40,30 @@ export function copyPublic() {
   if (publicDir !== undefined && fse.pathExistsSync(publicDir)) {
     fse.copy(publicDir, path.join(config.chromeOutputDir, path.basename(publicDir)));
   }
+}
+
+/**
+ * Define an arbitrary id in the build result.
+ * @param id
+ * @returns
+ */
+export function defineCrxContentBuildIdPlugin(id: string) {
+  const devSwPlugin: Plugin = {
+    name: 'define-crx-content-build-id-plugin',
+    setup: (build) => {
+      build.onEnd((res) => {
+        const meta = res.metafile;
+        if (meta !== undefined) {
+          const outputPathes = Object.keys(meta.outputs);
+          const buildResult = fse.readFileSync(outputPathes[0]);
+
+          fse.writeFileSync(
+            outputPathes[0],
+            [`window.__CRX_CONTENT_BUILD_ID = "${id}";\n`, buildResult].join('\n'),
+          );
+        }
+      });
+    },
+  };
+  return devSwPlugin;
 }
