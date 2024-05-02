@@ -1,7 +1,7 @@
 {
   "name": "crx-monkey",
   "type": "module",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "",
   "bin": {
     "crx-monkey": "bin/crx-monkey"
@@ -9,8 +9,12 @@
   "main": "./dist/node/main.js",
   "types": "./dist/node/main.d.ts",
   "exports": {
-    "./node": "./dist/node/main.js",
-    "./client": "./dist/client/main.js"
+    ".": {
+      "import": {
+        "types": "./dist/client/main.d.ts",
+        "default": "./dist/client/main.js"
+      }
+    }
   },
   "scripts": {
     "build": "rollup -c",
