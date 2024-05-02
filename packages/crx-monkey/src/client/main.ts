@@ -16,6 +16,7 @@ export async function getExtensionId() {
     {
       type: 'get-id',
       crxContentBuildId: window.__CRX_CONTENT_BUILD_ID,
+      detail: null,
     },
     '*',
   );
@@ -35,6 +36,7 @@ export function bypassMessage<T = never>(
     {
       type: 'on-message',
       crxContentBuildId: window.__CRX_CONTENT_BUILD_ID,
+      detail: null,
     },
     '*',
   );
@@ -42,6 +44,32 @@ export function bypassMessage<T = never>(
   waitResult<{ request: T; sender: { id: string; origin: string } }>('on-message', (data) => {
     callback(data.request, data.sender);
   });
+}
+
+/**
+ * Bypass `chrome.runtime.sendMessage`.
+ *
+ * You can send message to service worker.
+ * @param callback
+ */
+export async function bypassSendMessage<T = never, U = never>(
+  message: T,
+  options?: object,
+  callback?: (response: U) => void,
+) {
+  window.postMessage(
+    {
+      type: 'send-message',
+      crxContentBuildId: window.__CRX_CONTENT_BUILD_ID,
+      detail: { message, options },
+    },
+    '*',
+  );
+
+  const data = await waitResultOnce<{ response: U }>('send-message');
+  if (callback !== undefined) {
+    callback(data.response);
+  }
 }
 
 async function waitResult<T = string>(type: string, callback: (data: T) => void) {
