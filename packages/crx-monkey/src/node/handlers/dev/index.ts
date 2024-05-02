@@ -16,12 +16,13 @@ import { WatchUserScript } from './WatchUserScript';
 import { WatchContentScripts } from './WatchContentScripts';
 import { WatchServiceWorker } from './WatchServiceWorker';
 import { WatchPopup } from './WatchPopup';
+import { CrxMonkeyManifest } from 'src/node/types';
 
 export default async function handleDev() {
   const config = getConfig();
 
   const data = fs.readFileSync(config.manifestJsonPath!);
-  const manifest: chrome.runtime.ManifestV3 = JSON.parse(data.toString());
+  const manifest: CrxMonkeyManifest = JSON.parse(data.toString());
 
   if (config.devServer !== undefined) {
     const hostingServer = new ScriptHostingServer(config.devServer.host, config.devServer.port);

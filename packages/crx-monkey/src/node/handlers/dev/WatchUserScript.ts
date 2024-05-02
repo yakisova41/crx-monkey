@@ -17,6 +17,7 @@ import { ReloadServer } from './server/reloadServer';
 import prettier from 'prettier';
 import { UsersScript } from '../UserScript';
 import consola from 'consola';
+import { CrxMonkeyManifest } from 'src/node/types';
 
 export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -24,7 +25,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
   private cssResultStore: Record<string, Buffer> = {};
 
   constructor(
-    manifest: chrome.runtime.ManifestV3,
+    manifest: CrxMonkeyManifest,
     manifestFactory: ManifestFactory,
     headerFactory: UserscriptHeaderFactory,
     reloadServer: ReloadServer,

@@ -8,12 +8,13 @@ import { BuildServiceWorker } from './BuildServiceWorker';
 import { BuildUserScript } from './BuildUserScript';
 import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
 import { BuildPopup } from './BuildPopup';
+import { CrxMonkeyManifest } from 'src/node/types';
 
 export default async function handlebuild() {
   const config = getConfig();
 
   const data = fs.readFileSync(config.manifestJsonPath!);
-  const manifest: chrome.runtime.ManifestV3 = JSON.parse(data.toString());
+  const manifest: CrxMonkeyManifest = JSON.parse(data.toString());
 
   const manifestFactory = new ManifestFactory(manifest);
   const headerFactory = new UserscriptHeaderFactory();
