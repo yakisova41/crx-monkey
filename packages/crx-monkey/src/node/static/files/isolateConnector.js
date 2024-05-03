@@ -5,7 +5,8 @@ window.addEventListener('message', (e) => {
   if (
     data.type !== undefined &&
     data.crxContentBuildId !== undefined &&
-    data.detail !== undefined
+    data.detail !== undefined &&
+    data.actionId !== undefined
   ) {
     if (data.crxContentBuildId === `${crxContentBuildId}`) {
       switch (data.type) {
@@ -15,6 +16,7 @@ window.addEventListener('message', (e) => {
               detail: {
                 type: 'get-id',
                 data: chrome.runtime.id,
+                actionId: data.actionId,
               },
             }),
           );
@@ -26,6 +28,7 @@ window.addEventListener('message', (e) => {
                 detail: {
                   type: 'on-message',
                   data: { request, sender },
+                  actionId: data.actionId,
                 },
               }),
             );
@@ -39,6 +42,7 @@ window.addEventListener('message', (e) => {
                 detail: {
                   type: 'send-message',
                   data: { response },
+                  actionId: data.actionId,
                 },
               }),
             );
