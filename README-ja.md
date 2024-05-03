@@ -141,3 +141,87 @@ prettier: {
 ```
 
 Userscriptビルド後に実行する[Prettier](https://github.com/prettier/prettier)を使用したフォーマットを構成します。
+
+## Client用の関数
+
+CRX-MONKEYはコンテントスクリプトから使用できるさまざまなユーティリティ関数を提供します。
+
+> [!Note]
+> Connector requiredの機能は`manifest.json`に`connection_isolated`を設定してください。
+>
+> ```js
+>   "content_scripts": [
+>     {
+>       "js": ["src/contentScript/contentScript.ts"],
+>       "connection_isolated": true
+>     }
+>   ]
+> ```
+
+### getRunningRuntime
+
+スクリプトが拡張機能として実行されているか、Userscriptとして実行されているかを取得します。
+
+| Is executable? | Method                               |
+| -------------- | ------------------------------------ |
+| ✅             | Chrome Extension running in MAIN     |
+| ✅             | Chrome Extension running in ISOLATED |
+| ✅             | Userscript                           |
+
+```js
+import { getRunningRuntime } from 'crx-monkey';
+
+const runtime = getRunningRuntime();
+
+console.log('Running by:', runtime);
+```
+
+### getExtensionId (Connector required)
+
+拡張機能のID(`chrome.runtime.id`の値)を取得します。
+
+| Is executable? | Method                               |
+| -------------- | ------------------------------------ |
+| ✅             | Chrome Extension running in MAIN     |
+| ✅             | Chrome Extension running in ISOLATED |
+| ❌             | Userscript                           |
+
+```js
+import { getExtensionId } from 'crx-monkey';
+
+getExtensionId().then((id) => {
+  console.log('id:', id);
+});
+```
+
+### bypassMessage (Connector required)
+
+メッセージの受信(`chrome.runtime.onMessage.addListener`)をバイパスします。
+
+| Is executable? | Method                           |
+| -------------- | -------------------------------- |
+| ✅             | Chrome Extension running in MAIN |
+| ❌             | Userscript                       |
+
+```js
+import { bypassSendMessage } from 'crx-monkey';
+
+bypassMessage((msg) => {
+  console.log('Receved a message.', msg);
+});
+```
+
+### bypassSendMessage (Connector required)
+
+メッセージの送信(`chrome.runtime.sendMessage`)をバイパスします。
+
+| Is executable? | Method                           |
+| -------------- | -------------------------------- |
+| ✅             | Chrome Extension running in MAIN |
+| ❌             | Userscript                       |
+
+```js
+import { bypassSendMessage } from 'crx-monkey';
+
+bypassSendMessage({ msg: 'Hi' });
+```
