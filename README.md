@@ -141,3 +141,87 @@ prettier: {
 ```
 
 Change the formatting configuration using [Prettier](https://github.com/prettier/prettier), which is performed after the Userscript build.
+
+## Functions for Client
+
+CRX-MONKEY provides a variety of utility functions that can be used from content scripts.
+
+> [!Note]
+> For Connector required functionality, set `connection_isolated` in `manifest.json`.
+>
+> ```js
+>   "content_scripts": [
+>     {
+>       "js": ["src/contentScript/contentScript.ts"],
+>       "connection_isolated": true
+>     }
+>   ]
+> ```
+
+### getRunningRuntime
+
+Gets whether the script is running as an extension or as a Userscript.
+
+| Is executable? | Method                               |
+| -------------- | ------------------------------------ |
+| ✅             | Chrome Extension running in MAIN     |
+| ✅             | Chrome Extension running in ISOLATED |
+| ✅             | Userscript                           |
+
+```js
+import { getRunningRuntime } from 'crx-monkey';
+
+const runtime = getRunningRuntime();
+
+console.log('Running by:', runtime);
+```
+
+### getExtensionId (Connector required)
+
+Get the ID of the extension (the value of `chrome.runtime.id`).
+
+| Is executable? | Method                               |
+| -------------- | ------------------------------------ |
+| ✅             | Chrome Extension running in MAIN     |
+| ✅             | Chrome Extension running in ISOLATED |
+| ❌             | Userscript                           |
+
+```js
+import { getExtensionId } from 'crx-monkey';
+
+getExtensionId().then((id) => {
+  console.log('id:', id);
+});
+```
+
+### bypassMessage (Connector required)
+
+Bypass message reception (`chrome.runtime.onMessage.addListener`).
+
+| Is executable? | Method                           |
+| -------------- | -------------------------------- |
+| ✅             | Chrome Extension running in MAIN |
+| ❌             | Userscript                       |
+
+```js
+import { bypassSendMessage } from 'crx-monkey';
+
+bypassMessage((msg) => {
+  console.log('Receved a message.', msg);
+});
+```
+
+### bypassSendMessage (Connector required)
+
+Bypass sending messages (`chrome.runtime.sendMessage`).
+
+| Is executable? | Method                           |
+| -------------- | -------------------------------- |
+| ✅             | Chrome Extension running in MAIN |
+| ❌             | Userscript                       |
+
+```js
+import { bypassSendMessage } from 'crx-monkey';
+
+bypassSendMessage({ msg: 'Hi' });
+```
