@@ -1,3 +1,3 @@
 export const namedModule = () => {
-  console.log('module loaded');
+  console.log('!!Named module has loaded.');
 };

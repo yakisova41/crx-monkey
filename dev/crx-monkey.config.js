@@ -11,6 +11,7 @@ const config = {
       semi: true,
     },
   },
+  publicDir: 'public',
 };
 
 export default config;
