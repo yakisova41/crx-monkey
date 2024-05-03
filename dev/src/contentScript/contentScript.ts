@@ -21,8 +21,7 @@ if (runtime === 'Extension') {
   });
 
   bypassMessage((msg) => {
-    console.log('Receved a message by service worker.');
-    console.log(msg);
+    console.log('Receved a message by service worker.', msg);
   });
 
   console.log('Send a message to service worker.');
