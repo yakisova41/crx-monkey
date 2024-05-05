@@ -13,7 +13,6 @@ import { BuildResult } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
 import { Build, BuildImplements } from './Build';
-import { generateInjectScriptCode } from '../dev/utils';
 import prettier from 'prettier';
 import { UsersScript } from '../UserScript';
 import consola from 'consola';
@@ -262,6 +261,7 @@ export class BuildUserScript extends Build implements BuildImplements {
       contentScripts.forEach((contentScript) => {
         const { matches, js, css, run_at, exclude_matches, userscript_direct_inject } =
           contentScript;
+
         let thisContentScriptCode = '';
 
         if (matches !== undefined && !matches.includes('<all_urls>')) {
@@ -272,15 +272,12 @@ export class BuildUserScript extends Build implements BuildImplements {
         }
 
         thisContentScriptCode =
-          thisContentScriptCode + UsersScript.generateCodeIncludingInjectTiming(run_at, js, css);
+          thisContentScriptCode +
+          UsersScript.generateCodeIncludingInjectTiming(run_at, js, css, userscript_direct_inject);
 
         // End if.
         if (matches !== undefined && !matches.includes('<all_urls>')) {
           thisContentScriptCode = thisContentScriptCode + '}';
-        }
-
-        if (userscript_direct_inject) {
-          thisContentScriptCode = generateInjectScriptCode(thisContentScriptCode);
         }
 
         scriptContent = scriptContent + thisContentScriptCode + '\n\n';

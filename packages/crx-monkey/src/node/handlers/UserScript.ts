@@ -80,6 +80,7 @@ export class UsersScript {
     run_at: string | undefined,
     jsFilePaths: string[] | undefined,
     cssFilePaths: string[] | undefined,
+    directInject: boolean = false,
   ) {
     const syntaxs = {
       document_end: {
@@ -107,9 +108,33 @@ export class UsersScript {
      * Code that executes the function corresponding to the file path.
      */
     if (jsFilePaths !== undefined) {
+      const functionNames: string[] = [];
+
       jsFilePaths.forEach((filePath) => {
-        scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
+        if (directInject) {
+          const funcName = UsersScript.convertFilePathToFuncName(filePath);
+          functionNames.push(funcName);
+          //  scriptContent =
+          // scriptContent +
+          //generateInjectScriptCode(`${UsersScript.convertFilePathToFuncName(filePath)}();\n`);
+        } else {
+          scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
+        }
       });
+
+      if (directInject) {
+        const directScriptContent = ['const script = document.createElement("script");'];
+
+        functionNames.forEach((name) => {
+          directScriptContent.push(
+            `script.innerHTML = script.innerHTML + \`(\${${name}.toString()})();\``,
+          );
+        });
+
+        directScriptContent.push('unsafeWindow.document.body.appendChild(script)\n');
+
+        scriptContent = scriptContent + directScriptContent.join('\n');
+      }
     }
 
     /**
