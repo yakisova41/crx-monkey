@@ -73,10 +73,13 @@ export class BuildUserScript extends Build implements BuildImplements {
   private async headerRegister(allMatches: string[], unsafeWindow: boolean) {
     /**
      * Set all match to header.
+     * If included all_urls in matches of manifest, do not have to.
      */
-    allMatches.forEach((match) => {
-      this.headerFactory.push('@match', match);
-    });
+    if (!allMatches.includes('<all_urls>')) {
+      allMatches.forEach((match) => {
+        this.headerFactory.push('@match', match);
+      });
+    }
 
     /**
      * Set version designation by manifest to header.
@@ -266,18 +269,22 @@ export class BuildUserScript extends Build implements BuildImplements {
       contentScripts.forEach((contentScript) => {
         const { matches, js, css, run_at, exclude_matches } = contentScript;
 
-        // Start conditional statement of if for branch of href.
-        scriptContent =
-          scriptContent +
-          UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
+        if (matches !== undefined && !matches.includes('<all_urls>')) {
+          // Start conditional statement of if for branch of href.
+          scriptContent =
+            scriptContent +
+            UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
+        }
 
         scriptContent =
           scriptContent + UsersScript.generateCodeIncludingInjectTiming(run_at, js, css);
 
         // End if.
-        if (matches !== undefined) {
-          scriptContent = scriptContent + '}\n\n';
+        if (matches !== undefined && !matches.includes('<all_urls>')) {
+          scriptContent = scriptContent + '}';
         }
+
+        scriptContent = scriptContent + '\n\n';
       });
     }
 
