@@ -2,7 +2,7 @@ import { BuildOptions } from 'esbuild';
 import { Options } from 'prettier';
 
 export interface CrxMonkeyConfig {
-  manifestJsonPath: string;
+  manifestPath: string;
   chromeOutputDir: string;
   userscriptOutput: string;
   esBuildOptions: BuildOptions;
@@ -65,7 +65,7 @@ export interface UserScriptHeaderProps {
 }
 
 export interface CrxMonkeyManifest extends chrome.runtime.ManifestV3 {
-  content_scripts: CrxMonkeyContentScripts | undefined;
+  content_scripts?: CrxMonkeyContentScripts;
 }
 
 export type CrxMonkeyContentScripts = Array<{
@@ -79,6 +79,7 @@ export type CrxMonkeyContentScripts = Array<{
   include_globs?: string[] | undefined;
   exclude_globs?: string[] | undefined;
   world?: 'ISOLATED' | 'MAIN' | undefined;
-
+  userscript_direct_inject?: boolean;
   connection_isolated?: boolean;
+  [key: string]: unknown;
 }>;

@@ -22,8 +22,8 @@ export function copyLocales() {
 export function getlocalesPath() {
   const config = getConfig();
 
-  if (config.manifestJsonPath) {
-    const dir = path.dirname(config.manifestJsonPath);
+  if (config.manifestPath) {
+    const dir = path.dirname(config.manifestPath);
 
     return path.resolve(dir, '_locales');
   } else {

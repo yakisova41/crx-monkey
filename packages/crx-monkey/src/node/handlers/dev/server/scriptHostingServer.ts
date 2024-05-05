@@ -40,7 +40,7 @@ export class ScriptHostingServer {
     this.app.get('/userscript', (req, res) => {
       let filepath = config.userscriptOutput;
       if (!path.isAbsolute(config.userscriptOutput)) {
-        filepath = path.join(path.dirname(config.manifestJsonPath), config.userscriptOutput);
+        filepath = path.join(path.dirname(config.manifestPath), config.userscriptOutput);
       }
 
       if (fse.existsSync(filepath)) {
