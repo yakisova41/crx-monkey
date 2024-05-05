@@ -14,7 +14,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     const popupHtml = this.manifest.action?.default_popup;
 
     if (popupHtml !== undefined) {
-      const popupPath = path.join(path.dirname(this.config.manifestJsonPath!), popupHtml);
+      const popupPath = path.join(path.dirname(this.config.manifestPath!), popupHtml);
 
       const root = this.getParser(popupHtml);
       this.loadRequestLocalResources(root);

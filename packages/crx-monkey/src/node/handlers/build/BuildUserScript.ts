@@ -153,7 +153,7 @@ export class BuildUserScript extends Build implements BuildImplements {
       if (icons !== undefined) {
         const icon48 = icons['48'];
         if (icon48 !== undefined) {
-          const iconPath = path.join(path.dirname(this.config.manifestJsonPath!), icon48);
+          const iconPath = path.join(path.dirname(this.config.manifestPath!), icon48);
           const base64 = convertImgToBase64(iconPath);
           this.headerFactory.push('@icon', base64);
         } else {

@@ -6,7 +6,7 @@ import consola from 'consola';
 const configFileNameMatch = ['crx-monkey.config.js'];
 
 const defaultConfig: CrxMonkeyConfig = {
-  manifestJsonPath: path.join(process.cwd(), './manifest.json'),
+  manifestPath: path.join(process.cwd(), './manifest.js'),
   chromeOutputDir: path.join(process.cwd(), './dist/chrome'),
   userscriptOutput: path.join(process.cwd(), './dist/userscript/userscript.user.js'),
   esBuildOptions: {},

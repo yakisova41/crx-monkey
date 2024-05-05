@@ -1,6 +1,6 @@
 import { getConfig } from 'src/node/config';
 import path from 'path';
-import fs from 'fs';
+import fse from 'fs-extra';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { copyLocales, copyPublic } from '../utils';
 import { BuildContentScript } from './BuildContentScript';
@@ -13,8 +13,7 @@ import { CrxMonkeyManifest } from 'src/node/types';
 export default async function handlebuild() {
   const config = getConfig();
 
-  const data = fs.readFileSync(config.manifestJsonPath!);
-  const manifest: CrxMonkeyManifest = JSON.parse(data.toString());
+  const manifest: CrxMonkeyManifest = (await import(config.manifestPath)).default;
 
   const manifestFactory = new ManifestFactory(manifest);
   const headerFactory = new UserscriptHeaderFactory();
@@ -37,8 +36,8 @@ export default async function handlebuild() {
   /**
    * write manifest json
    */
-  fs.writeFileSync(
+  fse.outputFile(
     path.join(config.chromeOutputDir!, 'manifest.json'),
-    JSON.stringify(manifestFactory.getWorkspace(), undefined, 2),
+    JSON.stringify(manifestFactory.getResult(), undefined, 2),
   );
 }

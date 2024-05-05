@@ -1,11 +1,18 @@
+import { CrxMonkeyManifest } from '../types';
+
 /**
  * Create post-build manifest from original manifest
  */
 export class ManifestFactory {
-  private readonly originalManifest: chrome.runtime.ManifestV3;
-  private workspace: chrome.runtime.ManifestV3;
+  private readonly originalManifest: CrxMonkeyManifest;
+  private workspace: CrxMonkeyManifest;
 
-  constructor(originalManifest: chrome.runtime.ManifestV3) {
+  private definedCustomKeysByCrxMonkeyInContentScrpt = [
+    'userscript_direct_inject',
+    'connection_isolated',
+  ];
+
+  constructor(originalManifest: CrxMonkeyManifest) {
     this.originalManifest = originalManifest;
     this.workspace = structuredClone(this.originalManifest);
   }
@@ -16,6 +23,14 @@ export class ManifestFactory {
    */
   public getWorkspace() {
     return this.workspace;
+  }
+
+  /**
+   * Get manifest data absorbed defined custom keys by crx-monkey.
+   * @returns
+   */
+  public getResult() {
+    return this.absorbCustomKeys(this.workspace);
   }
 
   public resolveSw(distPath: string) {
@@ -78,5 +93,23 @@ export class ManifestFactory {
         }
       });
     }
+  }
+
+  private absorbCustomKeys(original: CrxMonkeyManifest) {
+    const result = original;
+
+    if (original.content_scripts !== undefined && result.content_scripts !== undefined) {
+      original.content_scripts.forEach((content_script, index) => {
+        Object.keys(content_script).forEach((key) => {
+          if (this.definedCustomKeysByCrxMonkeyInContentScrpt.includes(key)) {
+            if (result.content_scripts !== undefined) {
+              delete result.content_scripts[index][key];
+            }
+          }
+        });
+      });
+    }
+
+    return result;
   }
 }

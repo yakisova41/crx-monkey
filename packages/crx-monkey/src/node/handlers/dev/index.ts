@@ -1,7 +1,6 @@
 import { getConfig } from 'src/node/config';
 import { ScriptHostingServer } from './server/scriptHostingServer';
 import path from 'path';
-import fs from 'fs';
 import fse from 'fs-extra';
 import { createDevExtension } from './create-client/create-dev-extension';
 import { ReloadServer } from './server/reloadServer';
@@ -21,8 +20,7 @@ import { CrxMonkeyManifest } from 'src/node/types';
 export default async function handleDev() {
   const config = getConfig();
 
-  const data = fs.readFileSync(config.manifestJsonPath!);
-  const manifest: CrxMonkeyManifest = JSON.parse(data.toString());
+  const manifest: CrxMonkeyManifest = (await import(config.manifestPath)).default;
 
   if (config.devServer !== undefined) {
     const hostingServer = new ScriptHostingServer(config.devServer.host, config.devServer.port);
@@ -54,7 +52,7 @@ export default async function handleDev() {
      */
     fse.outputFile(
       path.join(config.chromeOutputDir!, 'manifest.json'),
-      JSON.stringify(manifestFactory.getWorkspace(), undefined, 2),
+      JSON.stringify(manifestFactory.getResult(), undefined, 2),
     );
 
     await hostingServer.start();
