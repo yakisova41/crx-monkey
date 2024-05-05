@@ -78,8 +78,8 @@ export class UsersScript {
    */
   public static generateCodeIncludingInjectTiming(
     run_at: string | undefined,
-    js: string[] | undefined,
-    css: string[] | undefined,
+    jsFilePaths: string[] | undefined,
+    cssFilePaths: string[] | undefined,
   ) {
     const syntaxs = {
       document_end: {
@@ -106,8 +106,8 @@ export class UsersScript {
     /**
      * Code that executes the function corresponding to the file path.
      */
-    if (js !== undefined) {
-      js.forEach((filePath) => {
+    if (jsFilePaths !== undefined) {
+      jsFilePaths.forEach((filePath) => {
         scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
       });
     }
@@ -115,8 +115,8 @@ export class UsersScript {
     /**
      * Code that executes the function injecting css corresponding to the file path.
      */
-    if (css !== undefined) {
-      css.forEach((filePath) => {
+    if (cssFilePaths !== undefined) {
+      cssFilePaths.forEach((filePath) => {
         scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
       });
     }

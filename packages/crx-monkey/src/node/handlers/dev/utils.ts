@@ -18,10 +18,12 @@ export function getDevelopDir() {
  * @returns
  */
 export function generateInjectScriptCode(scriptContent: string) {
+  const funcName = '__' + crypto.randomUUID().replaceAll('-', '_');
+
   return [
-    `const inject = ()=>{${scriptContent}}`,
+    `const ${funcName} = ()=>{${scriptContent}}`,
     'const script = document.createElement("script");',
-    'script.innerHTML = `(${inject.toString()})()`',
+    `script.innerHTML = \`(\${${funcName}.toString()})()\``,
     'unsafeWindow.document.body.appendChild(script)',
     '',
   ].join('\n');

@@ -18,7 +18,6 @@ const defaultConfig: CrxMonkeyConfig = {
   publicDir: path.join(process.cwd(), './public'),
   userScriptHeader: [],
   importIconToUsercript: false,
-  userscriptInjectPage: [],
   prettier: {
     format: true,
     options: { parser: 'babel' },

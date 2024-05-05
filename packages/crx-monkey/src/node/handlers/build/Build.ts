@@ -2,14 +2,14 @@ import consola from 'consola';
 import { BuildOptions, BuildResult, Plugin, build } from 'esbuild';
 import { getConfig } from 'src/node/config';
 import { ManifestFactory } from 'src/node/manifest-factory';
-import { CrxMonkeyConfig } from 'src/node/types';
+import { CrxMonkeyConfig, CrxMonkeyManifest } from 'src/node/types';
 
 export class Build {
-  protected readonly manifest: chrome.runtime.ManifestV3;
+  protected readonly manifest: CrxMonkeyManifest;
   protected readonly manifestFactory: ManifestFactory;
   protected readonly config: CrxMonkeyConfig;
 
-  constructor(manifest: chrome.runtime.ManifestV3, manifestFactory: ManifestFactory) {
+  constructor(manifest: CrxMonkeyManifest, manifestFactory: ManifestFactory) {
     this.manifest = manifest;
     this.manifestFactory = manifestFactory;
 
