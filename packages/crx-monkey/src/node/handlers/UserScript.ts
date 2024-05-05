@@ -78,8 +78,9 @@ export class UsersScript {
    */
   public static generateCodeIncludingInjectTiming(
     run_at: string | undefined,
-    js: string[] | undefined,
-    css: string[] | undefined,
+    jsFilePaths: string[] | undefined,
+    cssFilePaths: string[] | undefined,
+    directInject: boolean = false,
   ) {
     const syntaxs = {
       document_end: {
@@ -106,17 +107,41 @@ export class UsersScript {
     /**
      * Code that executes the function corresponding to the file path.
      */
-    if (js !== undefined) {
-      js.forEach((filePath) => {
-        scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
+    if (jsFilePaths !== undefined) {
+      const functionNames: string[] = [];
+
+      jsFilePaths.forEach((filePath) => {
+        if (directInject) {
+          const funcName = UsersScript.convertFilePathToFuncName(filePath);
+          functionNames.push(funcName);
+          //  scriptContent =
+          // scriptContent +
+          //generateInjectScriptCode(`${UsersScript.convertFilePathToFuncName(filePath)}();\n`);
+        } else {
+          scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
+        }
       });
+
+      if (directInject) {
+        const directScriptContent = ['const script = document.createElement("script");'];
+
+        functionNames.forEach((name) => {
+          directScriptContent.push(
+            `script.innerHTML = script.innerHTML + \`(\${${name}.toString()})();\``,
+          );
+        });
+
+        directScriptContent.push('unsafeWindow.document.body.appendChild(script)\n');
+
+        scriptContent = scriptContent + directScriptContent.join('\n');
+      }
     }
 
     /**
      * Code that executes the function injecting css corresponding to the file path.
      */
-    if (css !== undefined) {
-      css.forEach((filePath) => {
+    if (cssFilePaths !== undefined) {
+      cssFilePaths.forEach((filePath) => {
         scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
       });
     }

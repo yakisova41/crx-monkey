@@ -13,10 +13,10 @@ import { BuildResult } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
 import { Build, BuildImplements } from './Build';
-import { generateInjectScriptCode } from '../dev/utils';
 import prettier from 'prettier';
 import { UsersScript } from '../UserScript';
 import consola from 'consola';
+import { CrxMonkeyManifest } from 'src/node/types';
 
 export class BuildUserScript extends Build implements BuildImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
@@ -24,7 +24,7 @@ export class BuildUserScript extends Build implements BuildImplements {
   private cssResultStore: Record<string, Buffer> = {};
 
   constructor(
-    manifest: chrome.runtime.ManifestV3,
+    manifest: CrxMonkeyManifest,
     manifestFactory: ManifestFactory,
     headerFactory: UserscriptHeaderFactory,
   ) {
@@ -47,7 +47,7 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       const { allMatches } = createMatchMap(contentScripts, jsFiles, cssFiles);
 
-      const isExistInjectScripts = this.isIncludedInjectScripts(jsFiles);
+      const isExistInjectScripts = this.isIncludedInjectScripts();
 
       await this.headerRegister(allMatches, isExistInjectScripts);
 
@@ -196,15 +196,7 @@ export class BuildUserScript extends Build implements BuildImplements {
 
       const buildResultText = new TextDecoder().decode(content);
 
-      if (this.config.userscriptInjectPage.includes(filePath)) {
-        // Inject script using DOM.
-        scriptContent = scriptContent + generateInjectScriptCode(buildResultText);
-      } else {
-        // Run script in userscript sandbox.
-        scriptContent = scriptContent + buildResultText;
-      }
-
-      scriptContent = scriptContent + '}\n\n';
+      scriptContent = scriptContent + buildResultText + '}\n\n';
     });
 
     return scriptContent;
@@ -267,24 +259,28 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, run_at, exclude_matches } = contentScript;
+        const { matches, js, css, run_at, exclude_matches, userscript_direct_inject } =
+          contentScript;
+
+        let thisContentScriptCode = '';
 
         if (matches !== undefined && !matches.includes('<all_urls>')) {
           // Start conditional statement of if for branch of href.
-          scriptContent =
-            scriptContent +
+          thisContentScriptCode =
+            thisContentScriptCode +
             UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
         }
 
-        scriptContent =
-          scriptContent + UsersScript.generateCodeIncludingInjectTiming(run_at, js, css);
+        thisContentScriptCode =
+          thisContentScriptCode +
+          UsersScript.generateCodeIncludingInjectTiming(run_at, js, css, userscript_direct_inject);
 
         // End if.
         if (matches !== undefined && !matches.includes('<all_urls>')) {
-          scriptContent = scriptContent + '}';
+          thisContentScriptCode = thisContentScriptCode + '}';
         }
 
-        scriptContent = scriptContent + '\n\n';
+        scriptContent = scriptContent + thisContentScriptCode + '\n\n';
       });
     }
 
@@ -340,11 +336,11 @@ export class BuildUserScript extends Build implements BuildImplements {
    * @param jsFiles js file paths.
    * @returns
    */
-  private isIncludedInjectScripts(jsFiles: string[]) {
+  private isIncludedInjectScripts() {
     let result = false;
 
-    jsFiles.forEach((jsFile) => {
-      if (this.config.userscriptInjectPage.includes(jsFile)) {
+    this.manifest.content_scripts?.forEach((content_script) => {
+      if (content_script.userscript_direct_inject === true) {
         result = true;
       }
     });
