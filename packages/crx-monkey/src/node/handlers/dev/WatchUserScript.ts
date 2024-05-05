@@ -72,10 +72,13 @@ export class WatchUserScript extends Watch implements WatchImplements {
   private async headerRegister(allMatches: string[]) {
     /**
      * Set all match to header.
+     * If included all_urls in matches of manifest, do not have to.
      */
-    allMatches.forEach((match) => {
-      this.headerFactory.push('@match', match);
-    });
+    if (!allMatches.includes('<all_urls>')) {
+      allMatches.forEach((match) => {
+        this.headerFactory.push('@match', match);
+      });
+    }
 
     /**
      * Set version designation by manifest to header.
@@ -249,19 +252,23 @@ export class WatchUserScript extends Watch implements WatchImplements {
       contentScripts.forEach((contentScript) => {
         const { matches, js, css, exclude_matches } = contentScript;
 
-        // Start conditional statement of if for branch of href.
-        scriptContent =
-          scriptContent +
-          UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
+        if (matches !== undefined && !matches.includes('<all_urls>')) {
+          // Start conditional statement of if for branch of href.
+          scriptContent =
+            scriptContent +
+            UsersScript.genarateCodeOfStartIfStatementByMatches(matches, exclude_matches);
+        }
 
         // run_at is always document_start when dev mode.
         scriptContent =
           scriptContent + UsersScript.generateCodeIncludingInjectTiming('document_start', js, css);
 
         // End if.
-        if (matches !== undefined) {
+        if (matches !== undefined && !matches.includes('<all_urls>')) {
           scriptContent = scriptContent + '}\n\n';
         }
+
+        scriptContent = scriptContent + '\n\n';
       });
     }
 
