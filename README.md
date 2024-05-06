@@ -54,7 +54,7 @@ Export objects by default in the configuration file.
 
 /** @type {import('crx-monkey').NonLoadedCrxMonkeyConfig} */
 const config = {
-  manifestJsonPath: './manifest.json',
+  manifestPath: './manifest.js',
   chromeOutputDir: './dist/chrome',
   userscriptOutput: './dist/userscript.user.js',
   importIconToUsercript: true,
@@ -82,9 +82,9 @@ const config = {
 export default config;
 ```
 
-### manifestJsonPath
+### manifestPath
 
-You can specify the path to `manifest.json`.
+You can specify the path to `manifest.js`.
 
 Only manifest_version 3 is available. For more details on manifest format, please refer to [Chrome for Developers](https://developer.chrome.com/docs/extensions/reference/manifest?hl=ja).
 
