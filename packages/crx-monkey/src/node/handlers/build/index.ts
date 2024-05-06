@@ -9,11 +9,31 @@ import { BuildUserScript } from './BuildUserScript';
 import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
 import { BuildPopup } from './BuildPopup';
 import { CrxMonkeyManifest } from 'src/node/types';
+import consola from 'consola';
 
 export default async function handlebuild() {
   const config = getConfig();
 
-  const manifest: CrxMonkeyManifest = (await import(config.manifestPath)).default;
+  if (!fse.existsSync(config.manifestPath)) {
+    throw consola.error(
+      new Error(
+        `The manifest file ${config.manifestPath} does not exist. If you using json? set "manifestPath" to "crx-monkey.config.js"`,
+      ),
+    );
+  }
+
+  const manifestExt = config.manifestPath.split('.').pop();
+
+  let manifest: CrxMonkeyManifest;
+
+  if (manifestExt === 'json') {
+    const data = fse.readFileSync(config.manifestPath);
+    manifest = JSON.parse(data.toString());
+  } else if (manifestExt === 'js') {
+    manifest = (await import(config.manifestPath)).default;
+  } else {
+    throw consola.error(new Error('Only js and json manifests can be loaded.'));
+  }
 
   const manifestFactory = new ManifestFactory(manifest);
   const headerFactory = new UserscriptHeaderFactory();
