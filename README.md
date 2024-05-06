@@ -72,7 +72,6 @@ const config = {
     ['@author', 'me'],
     ['@grant', 'unsafeWindow'],
   ],
-  userscriptInjectPage: ['src/contentScript/contentScript.ts'],
   prettier: {
     format: true,
     options: { parser: 'babel' },
@@ -126,10 +125,6 @@ For detailed header format, please check [Documentation | Tampermonkey](https://
 ### importIconToUsercript
 
 Convert the 48-pixel icon specified in the `manifest.json` to base64 and set it to the userscript icon.
-
-### userscriptInjectPage
-
-You can specify the contentscript to be inserted using a script tag directly into the body accessed from the unsafeWindow when loading as a userscript.
 
 ### prettier
 
