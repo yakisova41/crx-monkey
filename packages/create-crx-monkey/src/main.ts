@@ -16,7 +16,7 @@ const language = await consola.prompt('Select a Language', {
   type: 'select',
   options: [chalk.blueBright('Typescript'), chalk.yellow('Javascript')],
 });
-let isTs = language === chalk.blueBright('Typescript') ? true : false;
+const isTs = language === chalk.blueBright('Typescript') ? true : false;
 
 const packageJsonPrototype = {
   name: projectName,
@@ -40,27 +40,32 @@ const manifestJsonPrototype = {
   description: 'description',
   content_scripts: [
     {
-      matches: ['https://*/*', 'http://*/*'],
-      js: [`src/contentscripts/contentscript.${isTs ? 'ts' : 'js'}`],
+      matches: ['<all_urls>'],
+      js: [`src/contentScripts/contentScript.${isTs ? 'ts' : 'js'}`],
     },
   ],
   action: {
     default_popup: 'src/popup/index.html',
   },
-
   background: {
     service_worker: `src/sw/sw.${isTs ? 'ts' : 'js'}`,
   },
   run_at: 'document_end',
 };
 
+const manifestJs = `
+// @ts-check
+
+/** @type {import('crx-monkey').CrxMonkeyManifest} */
+const manifest = ${JSON.stringify(manifestJsonPrototype, undefined, 2)};
+
+export default manifest;
+`;
+
 fse.mkdir(projectName);
 
 fse.outputFile(
-  path.join(
-    projectName,
-    `src/contentscripts/contentscript.${isTs ? 'ts' : 'js'}`,
-  ),
+  path.join(projectName, `src/contentScripts/contentScript.${isTs ? 'ts' : 'js'}`),
   "console.log('contentscirpt');",
 );
 
@@ -95,10 +100,7 @@ fse.outputFile(
   JSON.stringify(packageJsonPrototype, undefined, 2),
 );
 
-fse.outputFile(
-  path.join(projectName, 'manifest.json'),
-  JSON.stringify(manifestJsonPrototype, undefined, 2),
-);
+fse.outputFile(path.join(projectName, 'manifest.js'), manifestJs);
 
 fse.outputFile(
   path.join(projectName, 'crx-monkey.config.js'),
