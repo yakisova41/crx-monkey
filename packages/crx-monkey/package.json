@@ -31,7 +31,7 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@types/chrome": "^0.0.267",
+    "@types/chrome": "^0.0.268",
     "@types/express": "^4.17.21",
     "@types/fs-extra": "^11.0.4",
     "@types/tampermonkey": "^5.0.2",
