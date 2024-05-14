@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  GIT_USER: ${{ github.actor }}:${{ github.token }}
+  GIT_USER: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   deploy:
