@@ -17,12 +17,18 @@ const defaultConfig: CrxMonkeyConfig = {
   },
   publicDir: path.join(process.cwd(), './public'),
   userScriptHeader: [],
-  importIconToUsercript: false,
+  importIconToUserscript: false,
   prettier: {
     format: true,
     options: { parser: 'babel' },
   },
+  importIconToUsercript: false,
 };
+
+const warnKeys: { name: string; replace: string }[] = [
+  // This propetery of typo had used until version 0.7.0
+  { name: 'importIconToUsercript', replace: 'importIconToUserscript' },
+];
 
 /**
  * Get the path to crx-monkey.config.js.
@@ -99,7 +105,20 @@ function setDefaultConfig(config: Record<string, never>) {
   };
 
   Object.entries(config).forEach(([key, value]) => {
-    if (isKeyof<keyof CrxMonkeyConfig>(newConf, key) && value !== undefined) {
+    let added = false;
+
+    warnKeys.forEach(({ name, replace }) => {
+      if (name === key) {
+        consola.warn(`The property "${name}" in config are no longer used.`);
+
+        if (isKeyof<keyof CrxMonkeyConfig>(newConf, replace)) {
+          newConf[replace] = value;
+          added = true;
+        }
+      }
+    });
+
+    if (isKeyof<keyof CrxMonkeyConfig>(newConf, key) && value !== undefined && !added) {
       if (typeof newConf[key] === typeof value) {
         newConf[key] = value;
       }

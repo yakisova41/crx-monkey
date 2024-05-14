@@ -13,7 +13,11 @@ export interface CrxMonkeyConfig {
   };
   publicDir: string;
   userScriptHeader: UserScriptHeader;
+  importIconToUserscript: boolean;
+
+  // This propetery of typo had used until version 0.7.0
   importIconToUsercript: boolean;
+
   prettier: CrxPrettierOptions;
 }
 

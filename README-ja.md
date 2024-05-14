@@ -55,7 +55,7 @@ const config = {
   manifestJsonPath: './manifest.json',
   chromeOutputDir: './dist/chrome',
   userscriptOutput: './dist/userscript.user.js',
-  importIconToUsercript: true,
+  importIconToUserscript: true,
   esBuildOptions: {
     // ESbuild options
     minify: true,
