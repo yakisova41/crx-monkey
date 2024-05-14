@@ -147,7 +147,7 @@ export class BuildUserScript extends Build implements BuildImplements {
     /**
      * Add icon of 48size that converted to base64 in manifest.json to userscript.
      */
-    if (this.config.importIconToUsercript) {
+    if (this.config.importIconToUserscript) {
       const icons = this.manifest.icons;
 
       if (icons !== undefined) {
