@@ -12,8 +12,8 @@ jobs:
         working-directory: docs
 
     steps:
-        uses: actions/checkout@v4
       - name: git config
+        uses: actions/checkout@v4
         run: |
           git config --global user.email ${{ github.DOC_GITHUB_EMAIL }}
           git config --global user.name "yakisova41"
