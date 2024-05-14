@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+env:
+  GIT_USER: ${{ github.actor }}:${{ github.token }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,7 +20,5 @@ jobs:
         run: |
           git config --global user.email ${{ github.DOC_GITHUB_EMAIL }}
           git config --global user.name "yakisova41"
-      - run: yarn install
-      - run: yarn deploy
-        env:
-          GIT_USER: ${{ github.DOC_GITHUB_ACTOR }}:${{ github.DOC_GITHUB_TOKEN }}
+          yarn install
+          yarn deploy
