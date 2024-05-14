@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy
         run: |
-          git config --global user.email ${{ github.DOC_GITHUB_EMAIL }}
+          git config --global user.email ${{ secrets.DOC_GITHUB_EMAIL }}
           git config --global user.name "yakisova41"
           yarn install
           yarn deploy
