@@ -1,0 +1,23 @@
+name: Doc Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+
+    steps:
+      - name: git config
+        uses: actions/checkout@v4
+        run: |
+          git config --global user.email ${{ github.DOC_GITHUB_EMAIL }}
+          git config --global user.name "yakisova41"
+      - run: yarn install
+      - run: yarn deploy
+        env:
+          GIT_USER: ${{ github.DOC_GITHUB_ACTOR }}:${{ github.DOC_GITHUB_TOKEN }}
