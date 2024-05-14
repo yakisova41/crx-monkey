@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
 
+  workflow_dispatch:
+
 env:
   GIT_USER: ${{ github.actor }}:${{ github.token }}
 
