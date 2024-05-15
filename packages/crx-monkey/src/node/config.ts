@@ -14,6 +14,7 @@ const defaultConfig: CrxMonkeyConfig = {
     port: 3000,
     host: 'localhost',
     websocket: 3001,
+    disableWsUserscript: false,
   },
   publicDir: path.join(process.cwd(), './public'),
   userScriptHeader: [],

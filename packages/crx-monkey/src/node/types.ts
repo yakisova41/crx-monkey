@@ -10,6 +10,7 @@ export interface CrxMonkeyConfig {
     port: number;
     host: string;
     websocket: number;
+    disableWsUserscript: boolean;
   };
   publicDir: string;
   userScriptHeader: UserScriptHeader;
