@@ -26,7 +26,15 @@ async function getResponse() {
 }
 
 getResponse().then((code) => {
+  let injectCode = code;
+
+  //<if "bindGM">
+  const bindGMverName = btoa(crypto.randomUUID()).replaceAll('=', '$');
+  unsafeWindow[bindGMverName] = GM;
+  injectCode = `const ${bindGMHash} = window["${bindGMverName}"];` + injectCode;
+  //</if>
+
   const scriptElem = document.createElement('script');
-  scriptElem.textContent = code;
+  scriptElem.textContent = injectCode;
   unsafeWindow.document.body.appendChild(scriptElem);
 });

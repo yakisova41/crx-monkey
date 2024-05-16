@@ -23,6 +23,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
   private readonly headerFactory: UserscriptHeaderFactory;
   private buildResultStore: Record<string, Uint8Array> = {};
   private cssResultStore: Record<string, Buffer> = {};
+  public readonly bindGMHash: string;
 
   constructor(
     manifest: CrxMonkeyManifest,
@@ -34,6 +35,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     this.headerFactory = headerFactory;
     this.reloadServer;
+    this.bindGMHash = UsersScript.convertFilePathToFuncName(crypto.randomUUID());
   }
 
   public async watch() {
@@ -180,7 +182,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
         [
           '',
           `// ${filePath}`,
-          `function ${UsersScript.convertFilePathToFuncName(filePath)}() {`,
+          `function ${UsersScript.convertFilePathToFuncName(filePath)}(GM) {`,
         ].join('\n');
 
       const buildResultText = new TextDecoder().decode(content);
@@ -250,7 +252,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, exclude_matches } = contentScript;
+        const { matches, js, css, exclude_matches, bind_GM_api } = contentScript;
 
         if (matches !== undefined && !matches.includes('<all_urls>')) {
           // Start conditional statement of if for branch of href.
@@ -261,7 +263,15 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
         // run_at is always document_start when dev mode.
         scriptContent =
-          scriptContent + UsersScript.generateCodeIncludingInjectTiming('document_start', js, css);
+          scriptContent +
+          UsersScript.generateCodeIncludingInjectTiming(
+            'document_start',
+            js,
+            css,
+            false,
+            false,
+            bind_GM_api === true ? this.bindGMHash : false,
+          );
 
         // End if.
         if (matches !== undefined && !matches.includes('<all_urls>')) {

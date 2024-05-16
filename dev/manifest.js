@@ -18,6 +18,7 @@ const manifest = {
       world: 'MAIN',
       connection_isolated: true,
       userscript_direct_inject: true,
+      bind_GM_api: true,
     },
     {
       matches: ['https://www.google.com/*'],
