@@ -6,7 +6,7 @@ import fse from 'fs-extra';
  * @param vars Variables to inject into static code.
  * @returns
  */
-export function loadStaticFile(filePath: string, vars: Record<string, string> = {}) {
+export function loadStaticFile(filePath: string, vars: Record<string, string | boolean> = {}) {
   const buffer = fse.readFileSync(filePath);
   let contents = buffer.toString();
 
@@ -14,8 +14,23 @@ export function loadStaticFile(filePath: string, vars: Record<string, string> = 
     const value = vars[varName];
     const reg = `\${${varName}}`;
 
-    contents = contents.replaceAll(reg, value);
+    contents = contents.replaceAll(reg, String(value));
   });
+
+  const templateIfs = contents.match(/\/\/<if ".*">[^/]*\/\/<\/if>/g);
+
+  if (templateIfs !== null) {
+    templateIfs.forEach((templateIfString) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [match, ifVarName, templateCode] = templateIfString.match(
+        /\/\/<if "(.*)">([^/]*)\/\/<\/if>/,
+      )!;
+
+      if (vars[ifVarName] !== true) {
+        contents = contents.replaceAll(`//<if "${ifVarName}">${templateCode}//</if>`, '');
+      }
+    });
+  }
 
   return contents;
 }

@@ -5,7 +5,7 @@ import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
 import { loadStaticFile } from 'src/node/static/main';
 import { CrxMonkeyConfig } from 'src/node/types';
 
-export function createDevUserscript(headerFactory: UserscriptHeaderFactory) {
+export function createDevUserscript(headerFactory: UserscriptHeaderFactory, bindGMHash: string) {
   const fileName = 'crx-monkey-dev.user.js';
 
   const config = getConfig();
@@ -20,24 +20,28 @@ export function createDevUserscript(headerFactory: UserscriptHeaderFactory) {
 
     fse.outputFile(
       devUserscriptPath,
-      [headerCode, generateDevUserscriptCode(config.devServer)].join('\n'),
+      [headerCode, generateDevUserscriptCode(config.devServer, bindGMHash)].join('\n'),
     );
   }
 }
 
-function generateDevUserscriptCode(devServer: CrxMonkeyConfig['devServer']) {
+function generateDevUserscriptCode(devServer: CrxMonkeyConfig['devServer'], bindGMHash: string) {
   let code: string;
 
   if (devServer.disableWsUserscript) {
     code = loadStaticFile(path.join(import.meta.dirname, './static/userScriptDevUseGmXhr.js'), {
       'devServer.host': devServer.host,
       'devServer.port': String(devServer.port),
+      bindGM: true,
+      bindGMHash,
     });
   } else {
     code = loadStaticFile(path.join(import.meta.dirname, './static/userScriptDev.js'), {
       'devServer.host': devServer.host,
       'devServer.port': String(devServer.port),
       'devServer.websocket': String(devServer.websocket),
+      bindGM: true,
+      bindGMHash,
     });
   }
 

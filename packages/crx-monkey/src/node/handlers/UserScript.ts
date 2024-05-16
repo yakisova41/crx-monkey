@@ -74,6 +74,9 @@ export class UsersScript {
    * @param run_at
    * @param js
    * @param css
+   * @param directInject Add code to insert scripts using the DOM
+   * @param bindGM
+   * @param defineGM
    * @returns
    */
   public static generateCodeIncludingInjectTiming(
@@ -81,6 +84,8 @@ export class UsersScript {
     jsFilePaths: string[] | undefined,
     cssFilePaths: string[] | undefined,
     directInject: boolean = false,
+    bindGM: boolean = false,
+    defineGMHash: string | false = false,
   ) {
     const syntaxs = {
       document_end: {
@@ -114,16 +119,28 @@ export class UsersScript {
         if (directInject) {
           const funcName = UsersScript.convertFilePathToFuncName(filePath);
           functionNames.push(funcName);
-          //  scriptContent =
-          // scriptContent +
-          //generateInjectScriptCode(`${UsersScript.convertFilePathToFuncName(filePath)}();\n`);
         } else {
-          scriptContent = scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}();\n`;
+          let args = '';
+
+          if (defineGMHash) {
+            args = args + defineGMHash;
+          }
+
+          scriptContent =
+            scriptContent + `${UsersScript.convertFilePathToFuncName(filePath)}(${args});\n`;
         }
       });
 
       if (directInject) {
         const directScriptContent = ['const script = document.createElement("script");'];
+
+        if (bindGM) {
+          directScriptContent.push(
+            "const bindGMverName = btoa(crypto.randomUUID()).replaceAll('=', '$');",
+          );
+          directScriptContent.push('unsafeWindow[bindGMverName] = GM;');
+          directScriptContent.push('script.innerHTML = `const GM = window["${bindGMverName}"];`;');
+        }
 
         functionNames.forEach((name) => {
           directScriptContent.push(

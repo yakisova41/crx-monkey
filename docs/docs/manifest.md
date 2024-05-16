@@ -24,6 +24,7 @@ const manifest = {
       world: 'MAIN',
       connection_isolated: true,
       userscript_direct_inject: true,
+      bind_GM_api: false
     },
   ],
   background: {
@@ -45,10 +46,11 @@ export default manifest;
 ## CRX MONKEY proprietary options defined
 
 ### connection_isolated
+
 Enable [Connector required API](http://localhost:3000/docs/API/introduction#connector-required-api) in content scripts.
 
 ```js
-{ 
+{
     "content_scripts": [
         {
             "connection_isolated": true,
@@ -57,14 +59,14 @@ Enable [Connector required API](http://localhost:3000/docs/API/introduction#conn
 }
 ```
 
-
 ### userscript_direct_inject
+
 When run as a user script, it executes the script directly on the page, not on the sandbox.
 
 When this option is enabled, an **unsafeWindow** is automatically added to the **@grant** in the userscript header.
 
 ```js
-{ 
+{
     "content_scripts": [
         {
             "userscript_direct_inject": true
@@ -72,3 +74,19 @@ When this option is enabled, an **unsafeWindow** is automatically added to the *
     ]
 }
 ```
+
+### bind_GM_api
+
+```js
+{
+    "content_scripts": [
+        {
+          "bind_GM_api": true
+        }
+    ]
+}
+```
+
+This is a means of using the **GM API** when code is running directly on the DOM with **userscript_direct_inject** enabled.
+
+We will try to hide as much as possible by using random variable names, but the security is undeniably reduced.

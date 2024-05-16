@@ -259,7 +259,7 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, run_at, exclude_matches, userscript_direct_inject } =
+        const { matches, js, css, run_at, exclude_matches, userscript_direct_inject, bind_GM_api } =
           contentScript;
 
         let thisContentScriptCode = '';
@@ -273,7 +273,13 @@ export class BuildUserScript extends Build implements BuildImplements {
 
         thisContentScriptCode =
           thisContentScriptCode +
-          UsersScript.generateCodeIncludingInjectTiming(run_at, js, css, userscript_direct_inject);
+          UsersScript.generateCodeIncludingInjectTiming(
+            run_at,
+            js,
+            css,
+            userscript_direct_inject,
+            bind_GM_api,
+          );
 
         // End if.
         if (matches !== undefined && !matches.includes('<all_urls>')) {

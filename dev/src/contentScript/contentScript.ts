@@ -7,6 +7,7 @@ import {
 } from '../../../packages/crx-monkey/dist/client/main';
 
 console.log('!!Content script 1 has loaded.');
+console.log(GM);
 
 const runtime = getRunningRuntime();
 

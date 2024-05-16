@@ -10,7 +10,7 @@ export interface CrxMonkeyConfig {
     port: number;
     host: string;
     websocket: number;
-    disableWsUserscript: boolean;
+    disableWsUserscript?: boolean;
   };
   publicDir: string;
   userScriptHeader: UserScriptHeader;
@@ -85,5 +85,6 @@ export type CrxMonkeyContentScripts = Array<{
   world?: 'ISOLATED' | 'MAIN' | undefined;
   userscript_direct_inject?: boolean;
   connection_isolated?: boolean;
+  bind_GM_api?: boolean;
   [key: string]: unknown;
 }>;

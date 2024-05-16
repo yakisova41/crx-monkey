@@ -62,7 +62,7 @@ export default async function handleDev() {
     await popup.watch();
 
     createDevExtension(manifestFactory);
-    createDevUserscript(headerFactory);
+    createDevUserscript(headerFactory, userscript.bindGMHash);
     copyLocales();
     copyPublic();
 
