@@ -41,7 +41,7 @@ export class WatchContentScripts extends Watch implements WatchImplements {
         [defineCrxContentBuildIdPlugin(this.crxContentBuildId)],
       );
 
-      this.watchByCssPaths(cssFiles, (cssPath) => {
+      this.watchFiles(cssFiles, (cssPath) => {
         this.reloadServer.reload('RELOAD_CSS');
 
         consola.info(`CSS updated. | ${cssPath}`);

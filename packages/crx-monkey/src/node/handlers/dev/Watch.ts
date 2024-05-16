@@ -28,10 +28,10 @@ export class Watch {
     this.config = config;
   }
 
-  protected watchByCssPaths(cssFilePaths: string[], onChaged: (cssFilePath: string) => void) {
-    const watcher = chokidar.watch(cssFilePaths, {});
+  protected watchFiles(filePaths: string[], onChange: (cssFilePath: string) => void) {
+    const watcher = chokidar.watch(filePaths, {});
     watcher.on('change', (path) => {
-      onChaged(path);
+      onChange(path);
     });
   }
 

@@ -57,7 +57,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
         () => {},
       );
 
-      this.watchByCssPaths(cssFiles, () => {
+      this.watchFiles(cssFiles, () => {
         this.loadContentCssFiles(cssFiles);
         this.outputFile();
       });

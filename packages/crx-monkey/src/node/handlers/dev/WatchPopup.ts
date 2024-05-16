@@ -23,7 +23,7 @@ export class WatchPopup extends Watch implements WatchImplements {
 
       this.manifestFactory.resolvePopup('popup/popup.html');
 
-      this.watchByCssPaths([popupPath], (filePath) => {
+      this.watchFiles([popupPath], (filePath) => {
         consola.info(`Popup html updated. | ${filePath}`);
 
         const root = this.getParser(popupHtml);
