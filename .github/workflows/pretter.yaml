@@ -2,7 +2,7 @@ name: Pretter Auto Commit
 
 on:
   push:
-    branches: [main, development]
+    branches: [main]
 
 env:
   FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
@@ -28,3 +28,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply Prettier Change
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
