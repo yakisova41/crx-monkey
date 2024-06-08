@@ -22,7 +22,18 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
         },
         [devServiceWorkerPlugin(this.config)],
       );
+    } else {
+      this.createDevSw();
     }
+  }
+
+  /**
+   * If sw is not set in manifest, create sw for development.
+   */
+  private createDevSw() {
+    const { devServer, chromeOutputDir } = this.config;
+    this.manifestFactory.resolveSw('sw.js');
+    fse.writeFileSync(path.join(chromeOutputDir, 'sw.js'), generateDevSwCode(devServer));
   }
 
   private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
