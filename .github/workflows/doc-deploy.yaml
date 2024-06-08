@@ -8,6 +8,7 @@ on:
 
 env:
   GIT_USER: ${{ github.actor }}:${{ secrets.GH_TOKEN }}
+  FILE_PATTERN: 'docs/**/*'
 
 jobs:
   deploy:
