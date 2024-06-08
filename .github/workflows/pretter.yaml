@@ -1,8 +1,8 @@
 name: Pretter Auto Commit
 
 on:
-  push:
-    branches: [main]
+  pull_request:
+    branches: [main, development]
 
 env:
   FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
@@ -27,10 +27,7 @@ jobs:
       - name: Run Pretter
         run: bun run format
 
-      - name: auto commit
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply Prettier Change
-          push_options: '--force'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          ref: ${{ github.head_ref }}

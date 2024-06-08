@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main, development]
 
+env:
+  FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
+
 jobs:
   eslint:
     name: eslint
@@ -23,13 +26,3 @@ jobs:
 
       - name: Build
         run: bun run build
-
-  codecov:
-    runs-on: ubuntu-latest
-    name: codecov
-    steps:
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: yakisova41/crx-monkey
