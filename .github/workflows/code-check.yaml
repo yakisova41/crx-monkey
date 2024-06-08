@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main, development]
 
+  workflow_run:
+    workflows: ['format']
+    types:
+      - completed
 env:
   FILE_PATTERN: 'packages/**/*.{ts,tsx,js,jsx}'
 
