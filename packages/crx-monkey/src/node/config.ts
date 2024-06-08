@@ -2,6 +2,7 @@ import { promises } from 'fs';
 import { CrxMonkeyConfig } from './types';
 import path from 'path';
 import consola from 'consola';
+import { resolveFilePath } from './file';
 
 const configFileNameMatch = ['crx-monkey.config.js'];
 
@@ -144,7 +145,9 @@ export async function loadConfig(): Promise<CrxMonkeyConfig> {
     void getConfigPath()
       .then((configPath) => {
         if (configPath !== null) {
-          void import(configPath).then((buildConfig) => {
+          const confPath = path.resolve(configPath);
+
+          void import(resolveFilePath(confPath)).then((buildConfig) => {
             const rawConfig = buildConfig.default;
             configCahce = setDefaultConfig(rawConfig);
             resolve(configCahce);

@@ -16,6 +16,7 @@ import { WatchContentScripts } from './WatchContentScripts';
 import { WatchServiceWorker } from './WatchServiceWorker';
 import { WatchPopup } from './WatchPopup';
 import { CrxMonkeyManifest } from 'src/node/types';
+import { resolveFilePath } from 'src/node/file';
 
 export default async function handleDev() {
   const config = getConfig();
@@ -36,7 +37,7 @@ export default async function handleDev() {
     const data = fse.readFileSync(config.manifestPath);
     manifest = JSON.parse(data.toString());
   } else if (manifestExt === 'js') {
-    manifest = (await import(config.manifestPath)).default;
+    manifest = (await import(resolveFilePath(config.manifestPath))).default;
   } else {
     throw consola.error(new Error('Only js and json manifests can be loaded.'));
   }
