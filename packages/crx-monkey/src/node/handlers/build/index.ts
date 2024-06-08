@@ -10,6 +10,7 @@ import { UserscriptHeaderFactory } from 'src/node/userscript-header-factory';
 import { BuildPopup } from './BuildPopup';
 import { CrxMonkeyManifest } from 'src/node/types';
 import consola from 'consola';
+import { resolveFilePath } from 'src/node/file';
 
 export default async function handlebuild() {
   const config = getConfig();
@@ -30,7 +31,7 @@ export default async function handlebuild() {
     const data = fse.readFileSync(config.manifestPath);
     manifest = JSON.parse(data.toString());
   } else if (manifestExt === 'js') {
-    manifest = (await import(config.manifestPath)).default;
+    manifest = (await import(resolveFilePath(config.manifestPath))).default;
   } else {
     throw consola.error(new Error('Only js and json manifests can be loaded.'));
   }
