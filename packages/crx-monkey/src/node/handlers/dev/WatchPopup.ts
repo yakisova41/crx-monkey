@@ -4,10 +4,17 @@ import fse from 'fs-extra';
 import path from 'path';
 import consola from 'consola';
 import { parse, HTMLElement } from 'node-html-parser';
+import { FSWatcher } from 'chokidar';
 
 export class WatchPopup extends Watch implements WatchImplements {
   private requestLocalScripts: Record<string, HTMLElement> = {};
+  private requestLocalHrefFiles: Record<string, HTMLElement> = {};
+  private requestLocalSrcFiles: Record<string, HTMLElement> = {};
+
   private watchingLocalScripts: Record<string, BuildContext<BuildOptions>> = {};
+  private watchingLocalHrefFiles: Record<string, FSWatcher> = {};
+  private watchingLocalSrcFiles: Record<string, FSWatcher> = {};
+
   private outputFileNameMap: Record<string, string> = {};
 
   public async watch(): Promise<void> {
@@ -17,8 +24,15 @@ export class WatchPopup extends Watch implements WatchImplements {
       const popupPath = path.join(path.dirname(this.config.manifestPath!), popupHtml);
 
       const root = this.getParser(popupHtml);
-      this.loadRequestLocalResources(root);
+
+      this.loadRequestLocalJsResources(root);
+      this.loadRequestLocalHrefResources(root);
+      this.loadRequestLocalSrcResources(root);
+
+      await this.watchLocalHrefFiles(popupPath);
       await this.watchLocalScripts(popupPath);
+      await this.watchLocalSrcFiles(popupHtml);
+
       this.outputHTML(root);
 
       this.manifestFactory.resolvePopup('popup/popup.html');
@@ -27,26 +41,75 @@ export class WatchPopup extends Watch implements WatchImplements {
         consola.info(`Popup html updated. | ${filePath}`);
 
         const root = this.getParser(popupHtml);
-        this.loadRequestLocalResources(root);
+        this.loadRequestLocalJsResources(root);
+        this.loadRequestLocalHrefResources(root);
+        this.loadRequestLocalSrcResources(root);
 
         /**
          * Dispose watch of removed file.
          */
-        const removed = this.removeResourcesCheck();
-
+        this.removeResourcesCheck();
+        /*
         removed.forEach((removedFile) => {
           this.watchingLocalScripts[removedFile].dispose();
           delete this.watchingLocalScripts[removedFile];
 
           consola.start(`Popup script watch is disposed. | ${removedFile}`);
-        });
+        });*/
 
         this.watchLocalScripts(popupPath);
+        this.watchLocalHrefFiles(popupPath);
+        this.watchLocalSrcFiles(popupHtml);
+
         this.outputHTML(root);
 
         this.reloadServer.reload('RELOAD_POPUP_HTML');
       });
     }
+  }
+
+  private async watchLocalHrefFiles(popupPath: string) {
+    await Promise.all(
+      Object.keys(this.requestLocalHrefFiles).map(async (href) => {
+        // const hrefElem = this.requestLocalHrefFiles[href];
+
+        if (!Object.keys(this.watchingLocalHrefFiles).includes(href)) {
+          consola.start(`Popup resource watch is started. | ${href}`);
+          const entryPath = path.join(path.dirname(popupPath), href);
+          const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', href);
+          this.outputFileNameMap[href] = copiedPath;
+
+          fse.copy(entryPath, copiedPath);
+
+          this.watchingLocalHrefFiles[href] = this.watchFiles([entryPath], () => {
+            fse.copy(entryPath, copiedPath);
+            this.watchFileOnChange(href);
+          });
+        }
+
+        //hrefElem.setAttribute('href', this.outputFileNameMap[href]);
+      }),
+    );
+  }
+
+  private async watchLocalSrcFiles(popupPath: string) {
+    await Promise.all(
+      Object.keys(this.requestLocalSrcFiles).map(async (src) => {
+        if (!Object.keys(this.watchingLocalSrcFiles).includes(src)) {
+          consola.start(`Popup resource watch is started. | ${src}`);
+          const entryPath = path.join(path.dirname(popupPath), src);
+          const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', src);
+          this.outputFileNameMap[src] = copiedPath;
+
+          fse.copy(entryPath, copiedPath);
+
+          this.watchingLocalSrcFiles[src] = this.watchFiles([entryPath], () => {
+            fse.copy(entryPath, copiedPath);
+            this.watchFileOnChange(src);
+          });
+        }
+      }),
+    );
   }
 
   /**
@@ -107,7 +170,7 @@ export class WatchPopup extends Watch implements WatchImplements {
    * Load paths of local script loaded by popup html.
    * @param root
    */
-  private loadRequestLocalResources(root: HTMLElement) {
+  private loadRequestLocalJsResources(root: HTMLElement) {
     const scriptElems = root.querySelectorAll('script');
 
     const requestLocalScripts: Record<string, HTMLElement> = {};
@@ -125,9 +188,58 @@ export class WatchPopup extends Watch implements WatchImplements {
     this.requestLocalScripts = requestLocalScripts;
   }
 
+  /**
+   * Load paths of local file loaded by popup html.
+   * @param root
+   */
+  private loadRequestLocalHrefResources(root: HTMLElement) {
+    const hrefElems = root.querySelectorAll('link');
+
+    const requestLocalHrefFiles: Record<string, HTMLElement> = {};
+
+    hrefElems.forEach((elem) => {
+      const href = elem.getAttribute('href');
+      if (href !== undefined && href !== null) {
+        // Except the script href that start http.
+        if (href.match('^http.*') === null) {
+          requestLocalHrefFiles[href] = elem;
+        }
+      }
+    });
+
+    this.requestLocalHrefFiles = requestLocalHrefFiles;
+  }
+
+  /**
+   * Load paths of local file loaded by popup html.
+   * @param root
+   */
+  private loadRequestLocalSrcResources(root: HTMLElement) {
+    const linkElems = root.querySelectorAll('video, img, iframe');
+
+    const requestLocalSrcFiles: Record<string, HTMLElement> = {};
+
+    linkElems.forEach((elem) => {
+      const rel = elem.getAttribute('src');
+      if (rel !== undefined && rel !== null) {
+        // Except the script href that start http.
+        if (rel.match('^http.*') === null) {
+          requestLocalSrcFiles[rel] = elem;
+        }
+      }
+    });
+
+    this.requestLocalSrcFiles = requestLocalSrcFiles;
+  }
+
   private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
     this.reloadServer.reload('RELOAD_POPUP_JS');
     consola.info(`Popup script updated. | ${jsFilePath}`);
+  }
+
+  private watchFileOnChange(filePath: string) {
+    this.reloadServer.reload('RELOAD_POPUP_HTML');
+    consola.info(`Popup resource updated. | ${filePath}`);
   }
 
   /**
@@ -150,7 +262,28 @@ export class WatchPopup extends Watch implements WatchImplements {
 
     Object.keys(this.watchingLocalScripts).forEach((watchingLocalScript) => {
       if (!Object.keys(this.requestLocalScripts).includes(watchingLocalScript)) {
-        removedResources.push(watchingLocalScript);
+        this.watchingLocalScripts[watchingLocalScript].dispose();
+        delete this.watchingLocalScripts[watchingLocalScript];
+
+        consola.start(`Popup script watch is disposed. | ${watchingLocalScript}`);
+      }
+    });
+
+    Object.keys(this.watchingLocalHrefFiles).forEach((watchingLocalHrefFile) => {
+      if (!Object.keys(this.requestLocalHrefFiles).includes(watchingLocalHrefFile)) {
+        this.watchingLocalHrefFiles[watchingLocalHrefFile].close();
+        delete this.watchingLocalHrefFiles[watchingLocalHrefFile];
+
+        consola.start(`Popup resource watch is disposed. | ${watchingLocalHrefFile}`);
+      }
+    });
+
+    Object.keys(this.watchingLocalSrcFiles).forEach((watchingLocalSrcFile) => {
+      if (!Object.keys(this.requestLocalSrcFiles).includes(watchingLocalSrcFile)) {
+        this.watchingLocalSrcFiles[watchingLocalSrcFile].close();
+        delete this.watchingLocalSrcFiles[watchingLocalSrcFile];
+
+        consola.start(`Popup resource watch is disposed. | ${watchingLocalSrcFile}`);
       }
     });
 

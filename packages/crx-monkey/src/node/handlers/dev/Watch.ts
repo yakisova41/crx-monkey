@@ -28,11 +28,12 @@ export class Watch {
     this.config = config;
   }
 
-  protected watchFiles(filePaths: string[], onChange: (cssFilePath: string) => void) {
+  protected watchFiles(filePaths: string[], onChange: (filePath: string) => void) {
     const watcher = chokidar.watch(filePaths, {});
     watcher.on('change', (path) => {
       onChange(path);
     });
+    return watcher;
   }
 
   /**
