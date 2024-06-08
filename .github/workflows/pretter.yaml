@@ -31,5 +31,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply Prettier Change
+          push_options: '--force'
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
