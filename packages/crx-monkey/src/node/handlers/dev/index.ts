@@ -81,11 +81,15 @@ export default async function handleDev() {
 
     consola.box(
       [
-        `${chalk.cyan.bold('CRX-MONKEY')} ${chalk.green(`v${pkg.version}`)}`,
+        `${chalk.cyan.bold('CRX MONKEY')} ${chalk.green(`v${pkg.version}`)}`,
         '',
-        `💻 Open and install develop userscript : ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.port}/dev.user.js`)}`,
+        `💻 You can install the development chrome extension by loading the ${chalk.cyan.bold(config.chromeOutputDir)} directory to chrome.`,
+        '',
+        `💻 Open and install development userscript : ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.port}/dev.user.js`)}`,
         ` 🔄️ File hosting server running: ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.port}`)}`,
         ` 🔄️ Websocket server running: ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.websocket}`)}`,
+        '',
+        `📝 Documentation is here: ${chalk.blueBright('https://yakisova41.github.io/crx-monkey/docs/intro')}`,
       ].join('\n'),
     );
   }
