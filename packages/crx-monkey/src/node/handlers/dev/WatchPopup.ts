@@ -182,11 +182,15 @@ export class WatchPopup extends Watch implements WatchImplements {
     const requestLocalScripts: Record<string, HTMLElement> = {};
 
     scriptElems.forEach((elem) => {
-      const src = elem.getAttribute('src');
-      if (src !== undefined && src !== null) {
-        // Except the script href that start http.
-        if (src.match('^http.*') === null) {
-          requestLocalScripts[src] = elem;
+      const noBundleAttr = elem.getAttribute('no-bundle');
+
+      if (noBundleAttr !== '' && noBundleAttr !== 'true') {
+        const src = elem.getAttribute('src');
+        if (src !== undefined && src !== null) {
+          // Except the script href that start http.
+          if (src.match('^http.*') === null) {
+            requestLocalScripts[src] = elem;
+          }
         }
       }
     });
@@ -204,11 +208,15 @@ export class WatchPopup extends Watch implements WatchImplements {
     const requestLocalHrefFiles: Record<string, HTMLElement> = {};
 
     hrefElems.forEach((elem) => {
-      const href = elem.getAttribute('href');
-      if (href !== undefined && href !== null) {
-        // Except the script href that start http.
-        if (href.match('^http.*') === null) {
-          requestLocalHrefFiles[href] = elem;
+      const noBundleAttr = elem.getAttribute('no-bundle');
+
+      if (noBundleAttr !== '' && noBundleAttr !== 'true') {
+        const href = elem.getAttribute('href');
+        if (href !== undefined && href !== null) {
+          // Except the script href that start http.
+          if (href.match('^http.*') === null) {
+            requestLocalHrefFiles[href] = elem;
+          }
         }
       }
     });
@@ -226,11 +234,15 @@ export class WatchPopup extends Watch implements WatchImplements {
     const requestLocalSrcFiles: Record<string, HTMLElement> = {};
 
     linkElems.forEach((elem) => {
-      const rel = elem.getAttribute('src');
-      if (rel !== undefined && rel !== null) {
-        // Except the script href that start http.
-        if (rel.match('^http.*') === null) {
-          requestLocalSrcFiles[rel] = elem;
+      const noBundleAttr = elem.getAttribute('no-bundle');
+
+      if (noBundleAttr !== '' && noBundleAttr !== 'true') {
+        const rel = elem.getAttribute('src');
+        if (rel !== undefined && rel !== null) {
+          // Except the script href that start http.
+          if (rel.match('^http.*') === null) {
+            requestLocalSrcFiles[rel] = elem;
+          }
         }
       }
     });
