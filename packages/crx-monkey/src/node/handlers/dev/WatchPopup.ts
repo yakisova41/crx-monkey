@@ -5,6 +5,7 @@ import path from 'path';
 import consola from 'consola';
 import { parse, HTMLElement } from 'node-html-parser';
 import { FSWatcher } from 'chokidar';
+import { getConfig } from 'src/node/config';
 
 export class WatchPopup extends Watch implements WatchImplements {
   private requestLocalScripts: Record<string, HTMLElement> = {};
@@ -276,11 +277,13 @@ export class WatchPopup extends Watch implements WatchImplements {
    * @returns
    */
   private removeResourcesCheck() {
+    const { chromeOutputDir } = getConfig();
     const removedResources: string[] = [];
 
     Object.keys(this.watchingLocalScripts).forEach((watchingLocalScript) => {
       if (!Object.keys(this.requestLocalScripts).includes(watchingLocalScript)) {
         this.watchingLocalScripts[watchingLocalScript].dispose();
+        fse.remove(path.resolve(chromeOutputDir, this.outputFileNameMap[watchingLocalScript]));
         delete this.watchingLocalScripts[watchingLocalScript];
 
         consola.start(`Popup script watch is disposed. | ${watchingLocalScript}`);
@@ -290,6 +293,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     Object.keys(this.watchingLocalHrefFiles).forEach((watchingLocalHrefFile) => {
       if (!Object.keys(this.requestLocalHrefFiles).includes(watchingLocalHrefFile)) {
         this.watchingLocalHrefFiles[watchingLocalHrefFile].close();
+        fse.remove(path.resolve(chromeOutputDir, this.outputFileNameMap[watchingLocalHrefFile]));
         delete this.watchingLocalHrefFiles[watchingLocalHrefFile];
 
         consola.start(`Popup resource watch is disposed. | ${watchingLocalHrefFile}`);
@@ -299,6 +303,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     Object.keys(this.watchingLocalSrcFiles).forEach((watchingLocalSrcFile) => {
       if (!Object.keys(this.requestLocalSrcFiles).includes(watchingLocalSrcFile)) {
         this.watchingLocalSrcFiles[watchingLocalSrcFile].close();
+        fse.remove(path.resolve(chromeOutputDir, this.outputFileNameMap[watchingLocalSrcFile]));
         delete this.watchingLocalSrcFiles[watchingLocalSrcFile];
 
         consola.start(`Popup resource watch is disposed. | ${watchingLocalSrcFile}`);
