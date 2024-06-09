@@ -34,7 +34,10 @@ export class BuildPopup extends Build implements BuildImplements {
       Object.keys(this.requestLocalHrefFiles).map(async (href) => {
         const entryPath = path.join(path.dirname(popupPath), href);
         const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', href);
-        fse.copy(entryPath, copiedPath);
+        fse.copy(entryPath, copiedPath, {
+          errorOnExist: false,
+          overwrite: true,
+        });
       }),
     );
   }
@@ -44,7 +47,10 @@ export class BuildPopup extends Build implements BuildImplements {
       Object.keys(this.requestLocalSrcFiles).map(async (src) => {
         const entryPath = path.join(path.dirname(popupPath), src);
         const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', src);
-        fse.copy(entryPath, copiedPath);
+        fse.copy(entryPath, copiedPath, {
+          errorOnExist: false,
+          overwrite: true,
+        });
       }),
     );
   }

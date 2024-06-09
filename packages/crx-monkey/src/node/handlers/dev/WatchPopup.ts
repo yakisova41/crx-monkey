@@ -79,7 +79,10 @@ export class WatchPopup extends Watch implements WatchImplements {
           const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', href);
           this.outputFileNameMap[href] = copiedPath;
 
-          fse.copy(entryPath, copiedPath);
+          fse.copy(entryPath, copiedPath, {
+            errorOnExist: false,
+            overwrite: true,
+          });
 
           this.watchingLocalHrefFiles[href] = this.watchFiles([entryPath], () => {
             fse.copy(entryPath, copiedPath);
@@ -101,7 +104,10 @@ export class WatchPopup extends Watch implements WatchImplements {
           const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', src);
           this.outputFileNameMap[src] = copiedPath;
 
-          fse.copy(entryPath, copiedPath);
+          fse.copy(entryPath, copiedPath, {
+            errorOnExist: false,
+            overwrite: true,
+          });
 
           this.watchingLocalSrcFiles[src] = this.watchFiles([entryPath], () => {
             fse.copy(entryPath, copiedPath);
