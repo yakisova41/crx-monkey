@@ -2,7 +2,7 @@ import { getConfig } from 'src/node/config';
 import path from 'path';
 import fse from 'fs-extra';
 import { ManifestFactory } from 'src/node/manifest-factory';
-import { copyLocales, copyPublic } from '../utils';
+import { cleanupDist, copyLocales, copyPublic } from '../utils';
 import { BuildContentScript } from './BuildContentScript';
 import { BuildServiceWorker } from './BuildServiceWorker';
 import { BuildUserScript } from './BuildUserScript';
@@ -35,6 +35,8 @@ export default async function handlebuild() {
   } else {
     throw consola.error(new Error('Only js and json manifests can be loaded.'));
   }
+
+  await cleanupDist();
 
   const manifestFactory = new ManifestFactory(manifest);
   const headerFactory = new UserscriptHeaderFactory();

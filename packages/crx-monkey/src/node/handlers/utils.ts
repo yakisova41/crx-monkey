@@ -67,3 +67,22 @@ export function defineCrxContentBuildIdPlugin(id: string) {
   };
   return devSwPlugin;
 }
+
+/**
+ * Remove dist dir if it exists.
+ */
+export async function cleanupDist() {
+  const { chromeOutputDir, userscriptOutput } = getConfig();
+
+  await fse.exists(chromeOutputDir).then(async (isChromeExist) => {
+    if (isChromeExist) {
+      await fse.remove(chromeOutputDir);
+    }
+  });
+
+  await fse.exists(userscriptOutput).then(async (isUserscriptExist) => {
+    if (isUserscriptExist) {
+      await fse.remove(userscriptOutput);
+    }
+  });
+}
