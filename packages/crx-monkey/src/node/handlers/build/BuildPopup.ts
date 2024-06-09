@@ -5,6 +5,8 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 export class BuildPopup extends Build implements BuildImplements {
   private requestLocalScripts: Record<string, HTMLElement> = {};
+  private requestLocalHrefFiles: Record<string, HTMLElement> = {};
+  private requestLocalSrcFiles: Record<string, HTMLElement> = {};
 
   public async build(): Promise<void> {
     const popupHtml = this.manifest.action?.default_popup;
@@ -13,12 +15,38 @@ export class BuildPopup extends Build implements BuildImplements {
       const popupPath = path.join(path.dirname(this.config.manifestPath!), popupHtml);
 
       const root = this.getParser(popupHtml);
-      this.loadRequestLocalResources(root);
+      this.loadRequestLocalJsResources(root);
+      this.loadRequestLocalHrefResources(root);
+      this.loadRequestLocalSrcResources(root);
+
       await this.buildLocalScripts(popupPath);
+      await this.copyLocalHrefFiles(popupPath);
+      await this.copyLocalSrcFiles(popupPath);
+
       this.outputHTML(root);
 
       this.manifestFactory.resolvePopup('popup/popup.html');
     }
+  }
+
+  private async copyLocalHrefFiles(popupPath: string) {
+    await Promise.all(
+      Object.keys(this.requestLocalHrefFiles).map(async (href) => {
+        const entryPath = path.join(path.dirname(popupPath), href);
+        const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', href);
+        fse.copy(entryPath, copiedPath);
+      }),
+    );
+  }
+
+  private async copyLocalSrcFiles(popupPath: string) {
+    await Promise.all(
+      Object.keys(this.requestLocalSrcFiles).map(async (src) => {
+        const entryPath = path.join(path.dirname(popupPath), src);
+        const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', src);
+        fse.copy(entryPath, copiedPath);
+      }),
+    );
   }
 
   /**
@@ -68,7 +96,7 @@ export class BuildPopup extends Build implements BuildImplements {
    * Load paths of local script loaded by popup html.
    * @param root
    */
-  private loadRequestLocalResources(root: HTMLElement) {
+  private loadRequestLocalJsResources(root: HTMLElement) {
     const scriptElems = root.querySelectorAll('script');
 
     const requestLocalScripts: Record<string, HTMLElement> = {};
@@ -84,6 +112,50 @@ export class BuildPopup extends Build implements BuildImplements {
     });
 
     this.requestLocalScripts = requestLocalScripts;
+  }
+
+  /**
+   * Load paths of local file loaded by popup html.
+   * @param root
+   */
+  private loadRequestLocalHrefResources(root: HTMLElement) {
+    const hrefElems = root.querySelectorAll('link');
+
+    const requestLocalHrefFiles: Record<string, HTMLElement> = {};
+
+    hrefElems.forEach((elem) => {
+      const href = elem.getAttribute('href');
+      if (href !== undefined && href !== null) {
+        // Except the script href that start http.
+        if (href.match('^http.*') === null) {
+          requestLocalHrefFiles[href] = elem;
+        }
+      }
+    });
+
+    this.requestLocalHrefFiles = requestLocalHrefFiles;
+  }
+
+  /**
+   * Load paths of local file loaded by popup html.
+   * @param root
+   */
+  private loadRequestLocalSrcResources(root: HTMLElement) {
+    const linkElems = root.querySelectorAll('video, img, iframe');
+
+    const requestLocalSrcFiles: Record<string, HTMLElement> = {};
+
+    linkElems.forEach((elem) => {
+      const rel = elem.getAttribute('src');
+      if (rel !== undefined && rel !== null) {
+        // Except the script href that start http.
+        if (rel.match('^http.*') === null) {
+          requestLocalSrcFiles[rel] = elem;
+        }
+      }
+    });
+
+    this.requestLocalSrcFiles = requestLocalSrcFiles;
   }
 
   /**
