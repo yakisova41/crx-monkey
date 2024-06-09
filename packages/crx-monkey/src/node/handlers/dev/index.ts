@@ -5,7 +5,7 @@ import fse from 'fs-extra';
 import { createDevExtension } from './create-client/create-dev-extension';
 import { ReloadServer } from './server/reloadServer';
 import { ManifestFactory } from 'src/node/manifest-factory';
-import { copyLocales, copyPublic } from '../utils';
+import { cleanupDist, copyLocales, copyPublic } from '../utils';
 import pkg from '../../../../package.json';
 import { consola } from 'consola';
 import chalk from 'chalk';
@@ -41,6 +41,8 @@ export default async function handleDev() {
   } else {
     throw consola.error(new Error('Only js and json manifests can be loaded.'));
   }
+
+  await cleanupDist();
 
   if (config.devServer !== undefined) {
     const hostingServer = new ScriptHostingServer(config.devServer.host, config.devServer.port);
