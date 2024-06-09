@@ -5,6 +5,7 @@ import path from 'path';
 import consola from 'consola';
 import { parse, HTMLElement } from 'node-html-parser';
 import { FSWatcher } from 'chokidar';
+import { getConfig } from 'src/node/config';
 
 export class WatchPopup extends Watch implements WatchImplements {
   private requestLocalScripts: Record<string, HTMLElement> = {};
@@ -79,7 +80,10 @@ export class WatchPopup extends Watch implements WatchImplements {
           const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', href);
           this.outputFileNameMap[href] = copiedPath;
 
-          fse.copy(entryPath, copiedPath);
+          fse.copy(entryPath, copiedPath, {
+            errorOnExist: false,
+            overwrite: true,
+          });
 
           this.watchingLocalHrefFiles[href] = this.watchFiles([entryPath], () => {
             fse.copy(entryPath, copiedPath);
@@ -101,7 +105,10 @@ export class WatchPopup extends Watch implements WatchImplements {
           const copiedPath = path.resolve(this.config.chromeOutputDir, 'popup', src);
           this.outputFileNameMap[src] = copiedPath;
 
-          fse.copy(entryPath, copiedPath);
+          fse.copy(entryPath, copiedPath, {
+            errorOnExist: false,
+            overwrite: true,
+          });
 
           this.watchingLocalSrcFiles[src] = this.watchFiles([entryPath], () => {
             fse.copy(entryPath, copiedPath);
@@ -176,11 +183,15 @@ export class WatchPopup extends Watch implements WatchImplements {
     const requestLocalScripts: Record<string, HTMLElement> = {};
 
     scriptElems.forEach((elem) => {
-      const src = elem.getAttribute('src');
-      if (src !== undefined && src !== null) {
-        // Except the script href that start http.
-        if (src.match('^http.*') === null) {
-          requestLocalScripts[src] = elem;
+      const noBundleAttr = elem.getAttribute('no-bundle');
+
+      if (noBundleAttr !== '' && noBundleAttr !== 'true') {
+        const src = elem.getAttribute('src');
+        if (src !== undefined && src !== null) {
+          // Except the script href that start http.
+          if (src.match('^http.*') === null) {
+            requestLocalScripts[src] = elem;
+          }
         }
       }
     });
@@ -198,11 +209,15 @@ export class WatchPopup extends Watch implements WatchImplements {
     const requestLocalHrefFiles: Record<string, HTMLElement> = {};
 
     hrefElems.forEach((elem) => {
-      const href = elem.getAttribute('href');
-      if (href !== undefined && href !== null) {
-        // Except the script href that start http.
-        if (href.match('^http.*') === null) {
-          requestLocalHrefFiles[href] = elem;
+      const noBundleAttr = elem.getAttribute('no-bundle');
+
+      if (noBundleAttr !== '' && noBundleAttr !== 'true') {
+        const href = elem.getAttribute('href');
+        if (href !== undefined && href !== null) {
+          // Except the script href that start http.
+          if (href.match('^http.*') === null) {
+            requestLocalHrefFiles[href] = elem;
+          }
         }
       }
     });
@@ -220,11 +235,15 @@ export class WatchPopup extends Watch implements WatchImplements {
     const requestLocalSrcFiles: Record<string, HTMLElement> = {};
 
     linkElems.forEach((elem) => {
-      const rel = elem.getAttribute('src');
-      if (rel !== undefined && rel !== null) {
-        // Except the script href that start http.
-        if (rel.match('^http.*') === null) {
-          requestLocalSrcFiles[rel] = elem;
+      const noBundleAttr = elem.getAttribute('no-bundle');
+
+      if (noBundleAttr !== '' && noBundleAttr !== 'true') {
+        const rel = elem.getAttribute('src');
+        if (rel !== undefined && rel !== null) {
+          // Except the script href that start http.
+          if (rel.match('^http.*') === null) {
+            requestLocalSrcFiles[rel] = elem;
+          }
         }
       }
     });
@@ -258,11 +277,13 @@ export class WatchPopup extends Watch implements WatchImplements {
    * @returns
    */
   private removeResourcesCheck() {
+    const { chromeOutputDir } = getConfig();
     const removedResources: string[] = [];
 
     Object.keys(this.watchingLocalScripts).forEach((watchingLocalScript) => {
       if (!Object.keys(this.requestLocalScripts).includes(watchingLocalScript)) {
         this.watchingLocalScripts[watchingLocalScript].dispose();
+        fse.remove(path.resolve(chromeOutputDir, this.outputFileNameMap[watchingLocalScript]));
         delete this.watchingLocalScripts[watchingLocalScript];
 
         consola.start(`Popup script watch is disposed. | ${watchingLocalScript}`);
@@ -272,6 +293,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     Object.keys(this.watchingLocalHrefFiles).forEach((watchingLocalHrefFile) => {
       if (!Object.keys(this.requestLocalHrefFiles).includes(watchingLocalHrefFile)) {
         this.watchingLocalHrefFiles[watchingLocalHrefFile].close();
+        fse.remove(path.resolve(chromeOutputDir, this.outputFileNameMap[watchingLocalHrefFile]));
         delete this.watchingLocalHrefFiles[watchingLocalHrefFile];
 
         consola.start(`Popup resource watch is disposed. | ${watchingLocalHrefFile}`);
@@ -281,6 +303,7 @@ export class WatchPopup extends Watch implements WatchImplements {
     Object.keys(this.watchingLocalSrcFiles).forEach((watchingLocalSrcFile) => {
       if (!Object.keys(this.requestLocalSrcFiles).includes(watchingLocalSrcFile)) {
         this.watchingLocalSrcFiles[watchingLocalSrcFile].close();
+        fse.remove(path.resolve(chromeOutputDir, this.outputFileNameMap[watchingLocalSrcFile]));
         delete this.watchingLocalSrcFiles[watchingLocalSrcFile];
 
         consola.start(`Popup resource watch is disposed. | ${watchingLocalSrcFile}`);
