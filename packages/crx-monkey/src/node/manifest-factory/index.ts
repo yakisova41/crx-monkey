@@ -10,6 +10,7 @@ export class ManifestFactory {
   private definedCustomKeysByCrxMonkeyInContentScrpt = [
     'userscript_direct_inject',
     'connection_isolated',
+    'bind_GM_api',
   ];
 
   constructor(originalManifest: CrxMonkeyManifest) {
