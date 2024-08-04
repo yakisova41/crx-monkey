@@ -275,7 +275,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, exclude_matches, bind_GM_api } = contentScript;
+        const { matches, js, css, exclude_matches, bind_GM_api, trusted_inject } = contentScript;
 
         if (matches !== undefined && !matches.includes('<all_urls>')) {
           // Start conditional statement of if for branch of href.
@@ -294,6 +294,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
             false,
             false,
             bind_GM_api === true ? this.bindGMHash : false,
+            trusted_inject,
           );
 
         // End if.

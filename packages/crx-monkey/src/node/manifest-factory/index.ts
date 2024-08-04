@@ -11,6 +11,7 @@ export class ManifestFactory {
     'userscript_direct_inject',
     'connection_isolated',
     'bind_GM_api',
+    'trusted_inject',
   ];
 
   constructor(originalManifest: CrxMonkeyManifest) {

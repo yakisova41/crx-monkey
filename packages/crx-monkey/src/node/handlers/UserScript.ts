@@ -86,6 +86,7 @@ export class UsersScript {
     directInject: boolean = false,
     bindGM: boolean = false,
     defineGMHash: string | false = false,
+    trusted_inject: boolean = false,
   ) {
     const syntaxs = {
       document_end: {
@@ -143,9 +144,19 @@ export class UsersScript {
         }
 
         functionNames.forEach((name) => {
-          directScriptContent.push(
-            `script.innerHTML = script.innerHTML + \`(\${${name}.toString()})();\``,
-          );
+          if (trusted_inject) {
+            directScriptContent.push(
+              'const policy = window.trustedTypes.createPolicy("crx-monkey-trusted-inject-policy", {createScript: (input) => input,});',
+            );
+
+            directScriptContent.push(
+              `script.text = policy.createScript(script.text + \`(\${${name}.toString()})();\`)`,
+            );
+          } else {
+            directScriptContent.push(
+              `script.innerHTML = script.innerHTML + \`(\${${name}.toString()})();\``,
+            );
+          }
         });
 
         directScriptContent.push('unsafeWindow.document.body.appendChild(script)\n');

@@ -259,8 +259,16 @@ export class BuildUserScript extends Build implements BuildImplements {
 
     if (contentScripts !== undefined) {
       contentScripts.forEach((contentScript) => {
-        const { matches, js, css, run_at, exclude_matches, userscript_direct_inject, bind_GM_api } =
-          contentScript;
+        const {
+          matches,
+          js,
+          css,
+          run_at,
+          exclude_matches,
+          userscript_direct_inject,
+          bind_GM_api,
+          trusted_inject,
+        } = contentScript;
 
         let thisContentScriptCode = '';
 
@@ -279,6 +287,8 @@ export class BuildUserScript extends Build implements BuildImplements {
             css,
             userscript_direct_inject,
             bind_GM_api,
+            false,
+            trusted_inject,
           );
 
         // End if.

@@ -19,6 +19,7 @@ const manifest = {
       connection_isolated: true,
       userscript_direct_inject: true,
       bind_GM_api: true,
+      trusted_inject: true,
     },
     {
       matches: ['https://www.google.com/*'],
