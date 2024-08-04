@@ -35,7 +35,7 @@ export async function getManifest(config: CrxMonkeyConfig) {
   return manifest;
 }
 
-export async function loadJsResource(filePath: string): Promise<any> {
+export async function loadJsResource(filePath: string) {
   const data = fse.readFileSync(filePath, {});
   const tmpFilePath = path.resolve('./', crypto.randomUUID());
   await fse.outputFile(tmpFilePath, data.toString());

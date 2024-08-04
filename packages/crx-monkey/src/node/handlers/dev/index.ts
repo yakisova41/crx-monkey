@@ -15,8 +15,7 @@ import { WatchUserScript } from './WatchUserScript';
 import { WatchContentScripts } from './WatchContentScripts';
 import { WatchServiceWorker } from './WatchServiceWorker';
 import { WatchPopup } from './WatchPopup';
-import { CrxMonkeyConfig, CrxMonkeyManifest } from 'src/node/types';
-import { resolveFilePath } from 'src/node/file';
+import { CrxMonkeyConfig } from 'src/node/types';
 import { WatchImplements } from './Watch';
 import { WatchOtherResources } from './WatchOtherResource';
 

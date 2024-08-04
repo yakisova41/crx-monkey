@@ -2,8 +2,6 @@ import { CrxMonkeyConfig, CrxMonkeyManifest } from 'src/node/types';
 import { Watch, WatchImplements } from './Watch';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { ReloadServer } from './server/reloadServer';
-import fse from 'fs-extra';
-import path from 'path';
 import consola from 'consola';
 import { FSWatcher } from 'chokidar';
 
