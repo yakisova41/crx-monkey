@@ -107,4 +107,5 @@ export class Watch {
 
 export interface WatchImplements {
   watch(): Promise<void>;
+  dispose(): Promise<void>;
 }

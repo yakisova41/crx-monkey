@@ -10,8 +10,8 @@ import {
   convertChromeRunAtToUserJsRunAt,
   convertImgToBase64,
 } from 'src/node/userscript-header-factory/utils';
-import { BuildResult } from 'esbuild';
-import fse from 'fs-extra';
+import { BuildContext, BuildOptions, BuildResult } from 'esbuild';
+import fse, { FSWatcher } from 'fs-extra';
 import path from 'path';
 import { ReloadServer } from './server/reloadServer';
 import prettier from 'prettier';
@@ -24,6 +24,9 @@ export class WatchUserScript extends Watch implements WatchImplements {
   private buildResultStore: Record<string, Uint8Array> = {};
   private cssResultStore: Record<string, Buffer> = {};
   public readonly bindGMHash: string;
+
+  private jsWatchCtxs: Record<string, BuildContext<BuildOptions>> | null = null;
+  private fileWatchCtx: FSWatcher | null = null;
 
   constructor(
     manifest: CrxMonkeyManifest,
@@ -38,6 +41,26 @@ export class WatchUserScript extends Watch implements WatchImplements {
     this.bindGMHash = UsersScript.convertFilePathToFuncName(crypto.randomUUID());
   }
 
+  public async dispose() {
+    if (this.jsWatchCtxs === null || this.fileWatchCtx === null) {
+      throw consola.error(new Error('Dispose can be used after Watch is started'));
+    }
+
+    const jsWatchCtxs = this.jsWatchCtxs;
+
+    /**
+     * Dispose contexts of watch js.
+     */
+    await Promise.all(
+      Object.keys(jsWatchCtxs).map(async (jsWatchCtxKey) => {
+        const jsWatchCtx = jsWatchCtxs[jsWatchCtxKey];
+        await jsWatchCtx.dispose();
+      }),
+    );
+
+    this.fileWatchCtx.close();
+  }
+
   public async watch() {
     const contentScripts = this.manifest.content_scripts;
     if (contentScripts !== undefined) {
@@ -49,7 +72,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
 
       this.loadContentCssFiles(cssFiles);
 
-      await this.watchByJsFilePaths(
+      this.jsWatchCtxs = await this.watchByJsFilePaths(
         jsFiles,
         (...args) => {
           this.watchJsOnBuild(...args);
@@ -59,7 +82,7 @@ export class WatchUserScript extends Watch implements WatchImplements {
         () => {},
       );
 
-      this.watchFiles(cssFiles, () => {
+      this.fileWatchCtx = this.watchFiles(cssFiles, () => {
         this.loadContentCssFiles(cssFiles);
         this.outputFile();
       });

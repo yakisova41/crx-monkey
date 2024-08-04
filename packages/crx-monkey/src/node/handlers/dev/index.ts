@@ -5,7 +5,7 @@ import fse from 'fs-extra';
 import { createDevExtension } from './create-client/create-dev-extension';
 import { ReloadServer } from './server/reloadServer';
 import { ManifestFactory } from 'src/node/manifest-factory';
-import { cleanupDist, copyLocales, copyPublic } from '../utils';
+import { cleanupDist, copyLocales, copyPublic, getManifest } from '../utils';
 import pkg from '../../../../package.json';
 import { consola } from 'consola';
 import chalk from 'chalk';
@@ -15,82 +15,151 @@ import { WatchUserScript } from './WatchUserScript';
 import { WatchContentScripts } from './WatchContentScripts';
 import { WatchServiceWorker } from './WatchServiceWorker';
 import { WatchPopup } from './WatchPopup';
-import { CrxMonkeyManifest } from 'src/node/types';
-import { resolveFilePath } from 'src/node/file';
+import { CrxMonkeyConfig, CrxMonkeyManifest } from 'src/node/types';
+import { WatchOtherResources } from './WatchOtherResource';
+import { WatchImplements } from './Watch';
 
-export default async function handleDev() {
-  const config = getConfig();
+export class HandleDev {
+  private config: CrxMonkeyConfig;
+  private manifest!: CrxMonkeyManifest;
+  private isInitialized: boolean = false;
+  private hostingServer!: ScriptHostingServer;
+  private reloadServer!: ReloadServer;
+  private manifestFactory!: ManifestFactory;
 
-  if (!fse.existsSync(config.manifestPath)) {
-    throw consola.error(
-      new Error(
-        `The manifest file ${config.manifestPath} does not exist. If you using json? set "manifestPath" to "crx-monkey.config.js"`,
-      ),
+  private watchers: WatchImplements[] = [];
+
+  constructor() {
+    this.config = getConfig();
+  }
+
+  public async startServer() {
+    this.hostingServer = new ScriptHostingServer(
+      this.config.devServer.host,
+      this.config.devServer.port,
+    );
+
+    this.reloadServer = new ReloadServer(
+      this.config.devServer.host,
+      this.config.devServer.websocket,
     );
   }
 
-  const manifestExt = config.manifestPath.split('.').pop();
+  public async initialize() {
+    await cleanupDist();
 
-  let manifest: CrxMonkeyManifest;
-
-  if (manifestExt === 'json') {
-    const data = fse.readFileSync(config.manifestPath);
-    manifest = JSON.parse(data.toString());
-  } else if (manifestExt === 'js') {
-    manifest = (await import(resolveFilePath(config.manifestPath))).default;
-  } else {
-    throw consola.error(new Error('Only js and json manifests can be loaded.'));
+    this.manifest = await getManifest(this.config);
+    this.isInitialized = true;
   }
 
-  await cleanupDist();
+  private async setup() {
+    if (this.config.devServer !== undefined && this.isInitialized) {
+      this.manifestFactory = new ManifestFactory(this.manifest);
+      const headerFactory = new UserscriptHeaderFactory();
 
-  if (config.devServer !== undefined) {
-    const hostingServer = new ScriptHostingServer(config.devServer.host, config.devServer.port);
+      const userscript = new WatchUserScript(
+        this.manifest,
+        this.manifestFactory,
+        headerFactory,
+        this.reloadServer,
+      );
+      await userscript.watch();
 
-    const reloadServer = new ReloadServer(config.devServer.host, config.devServer.websocket);
+      const contentscript = new WatchContentScripts(
+        this.manifest,
+        this.manifestFactory,
+        this.reloadServer,
+      );
+      this.watchers.push(contentscript);
 
-    const manifestFactory = new ManifestFactory(manifest);
-    const headerFactory = new UserscriptHeaderFactory();
+      const sw = new WatchServiceWorker(this.manifest, this.manifestFactory, this.reloadServer);
+      this.watchers.push(sw);
 
-    const userscript = new WatchUserScript(manifest, manifestFactory, headerFactory, reloadServer);
-    await userscript.watch();
+      const popup = new WatchPopup(this.manifest, this.manifestFactory, this.reloadServer);
+      this.watchers.push(popup);
 
-    const contentscript = new WatchContentScripts(manifest, manifestFactory, reloadServer);
-    await contentscript.watch();
+      const otherResources = new WatchOtherResources(
+        this.manifest,
+        this.manifestFactory,
+        this.reloadServer,
+        this,
+      );
+      this.watchers.push(otherResources);
 
-    const sw = new WatchServiceWorker(manifest, manifestFactory, reloadServer);
-    await sw.watch();
+      createDevExtension(this.manifestFactory);
+      createDevUserscript(headerFactory, userscript.bindGMHash);
+      copyLocales();
+      copyPublic();
 
-    const popup = new WatchPopup(manifest, manifestFactory, reloadServer);
-    await popup.watch();
+      /**
+       * write manifest json
+       */
+      fse.outputFile(
+        path.join(this.config.chromeOutputDir!, 'manifest.json'),
+        JSON.stringify(this.manifestFactory.getResult(), undefined, 2),
+      );
+    }
+  }
 
-    createDevExtension(manifestFactory);
-    createDevUserscript(headerFactory, userscript.bindGMHash);
-    copyLocales();
-    copyPublic();
+  public async startWatch() {
+    await this.setup();
 
-    /**
-     * write manifest json
-     */
-    fse.outputFile(
-      path.join(config.chromeOutputDir!, 'manifest.json'),
-      JSON.stringify(manifestFactory.getResult(), undefined, 2),
-    );
+    this.watchers.forEach((watcher) => {
+      watcher.watch();
+    });
 
-    await hostingServer.start();
+    await this.hostingServer.start();
 
     consola.box(
       [
         `${chalk.cyan.bold('CRX MONKEY')} ${chalk.green(`v${pkg.version}`)}`,
         '',
-        `💻 You can install the development chrome extension by loading the ${chalk.cyan.bold(config.chromeOutputDir)} directory to chrome.`,
+        `💻 You can install the development chrome extension by loading the ${chalk.cyan.bold(this.config.chromeOutputDir)} directory to chrome.`,
         '',
-        `💻 Open and install development userscript : ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.port}/dev.user.js`)}`,
-        ` 🔄️ File hosting server running: ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.port}`)}`,
-        ` 🔄️ Websocket server running: ${chalk.blueBright(`http://${config.devServer.host}:${config.devServer.websocket}`)}`,
+        `💻 Open and install development userscript : ${chalk.blueBright(`http://${this.config.devServer.host}:${this.config.devServer.port}/dev.user.js`)}`,
+        ` 🔄️ File hosting server running: ${chalk.blueBright(`http://${this.config.devServer.host}:${this.config.devServer.port}`)}`,
+        ` 🔄️ Websocket server running: ${chalk.blueBright(`http://${this.config.devServer.host}:${this.config.devServer.websocket}`)}`,
         '',
         `📝 Documentation is here: ${chalk.blueBright('https://yakisova41.github.io/crx-monkey/docs/intro')}`,
       ].join('\n'),
     );
   }
+
+  public async stopWatch() {
+    Promise.all([
+      this.watchers.map(async (watcher) => {
+        await watcher.dispose();
+      }),
+    ]);
+
+    await this.hostingServer.dispose();
+    this.reloadServer.dispose();
+  }
+
+  public async reload() {
+    await Promise.all([
+      this.watchers.map(async (watcher) => {
+        await watcher.dispose();
+      }),
+    ]);
+
+    this.watchers = [];
+
+    await this.initialize();
+    await this.setup();
+
+    await Promise.all([
+      this.watchers.map(async (watcher) => {
+        await watcher.watch();
+      }),
+    ]);
+  }
+}
+
+export default async function handleDev() {
+  const dev = new HandleDev();
+  dev.initialize().then(async () => {
+    await dev.startServer();
+    await dev.startWatch();
+  });
 }

@@ -2,6 +2,8 @@ import express from 'express';
 import { getConfig } from 'src/node/config';
 import path from 'path';
 import fse from 'fs-extra';
+import * as http from 'http';
+import consola from 'consola';
 
 /**
  * The server of send to script code.
@@ -10,6 +12,7 @@ export class ScriptHostingServer {
   private readonly app: express.Express;
   private readonly host: string;
   private readonly port: number;
+  private server: null | http.Server = null;
 
   constructor(host: string, port: number) {
     this.app = express();
@@ -24,10 +27,18 @@ export class ScriptHostingServer {
   public async start() {
     this.setup();
     return new Promise((resolve) => {
-      this.app.listen(this.port, this.host, () => {
+      this.server = this.app.listen(this.port, this.host, () => {
         resolve(1);
       });
     });
+  }
+
+  public async dispose() {
+    if (this.server === null) {
+      throw consola.error(new Error('Dispose can be used after Watch is started'));
+    }
+
+    this.server.close();
   }
 
   private setup() {
