@@ -145,13 +145,23 @@ export class UsersScript {
 
         functionNames.forEach((name) => {
           if (trusted_inject) {
+            directScriptContent.push('if(unsafeWindow.trustedTypes !== undefined){');
+
             directScriptContent.push(
-              'const policy = window.trustedTypes.createPolicy("crx-monkey-trusted-inject-policy", {createScript: (input) => input,});',
+              'const policy = unsafeWindow.trustedTypes.createPolicy("crx-monkey-trusted-inject-policy", {createScript: (input) => input,});',
             );
 
             directScriptContent.push(
               `script.text = policy.createScript(script.text + \`(\${${name}.toString()})();\`)`,
             );
+
+            directScriptContent.push('} else {');
+
+            directScriptContent.push(
+              `script.innerHTML = script.innerHTML + \`(\${${name}.toString()})();\``,
+            );
+
+            directScriptContent.push('}');
           } else {
             directScriptContent.push(
               `script.innerHTML = script.innerHTML + \`(\${${name}.toString()})();\``,
