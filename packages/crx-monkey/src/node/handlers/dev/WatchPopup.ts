@@ -18,6 +18,48 @@ export class WatchPopup extends Watch implements WatchImplements {
 
   private outputFileNameMap: Record<string, string> = {};
 
+  private popupHtmlWacher: FSWatcher | null = null;
+
+  private isWatched = false;
+
+  public async dispose() {
+    if (this.popupHtmlWacher === null) {
+      throw consola.error(new Error('Dispose can be used after Watch is started'));
+    }
+
+    /**
+     * Dispose contexts of local scripts
+     */
+    Promise.all(
+      Object.keys(this.watchingLocalScripts).map(async (localScriptsKey) => {
+        const watchingLocalScript = this.watchingLocalScripts[localScriptsKey];
+        await watchingLocalScript.dispose();
+      }),
+    );
+
+    /**
+     * Dispose watcher of LocalHrefFiles
+     */
+    Promise.all(
+      Object.keys(this.watchingLocalHrefFiles).map(async (watchingLocalHrefFilesKey) => {
+        const watchingLocalHrefFile = this.watchingLocalHrefFiles[watchingLocalHrefFilesKey];
+        await watchingLocalHrefFile.close();
+      }),
+    );
+
+    /**
+     * Dispose watcher of LocalSrcFiles
+     */
+    Promise.all(
+      Object.keys(this.watchingLocalSrcFiles).map(async (watchingLocalSrcFilesKey) => {
+        const watchingLocalSrcFile = this.watchingLocalSrcFiles[watchingLocalSrcFilesKey];
+        await watchingLocalSrcFile.close();
+      }),
+    );
+
+    this.popupHtmlWacher.close();
+  }
+
   public async watch(): Promise<void> {
     const popupHtml = this.manifest.action?.default_popup;
 
@@ -38,7 +80,7 @@ export class WatchPopup extends Watch implements WatchImplements {
 
       this.manifestFactory.resolvePopup('popup/popup.html');
 
-      this.watchFiles([popupPath], (filePath) => {
+      this.popupHtmlWacher = this.watchFiles([popupPath], (filePath) => {
         consola.info(`Popup html updated. | ${filePath}`);
 
         const root = this.getParser(popupHtml);
@@ -252,13 +294,18 @@ export class WatchPopup extends Watch implements WatchImplements {
   }
 
   private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
-    this.reloadServer.reload('RELOAD_POPUP_JS');
-    consola.info(`Popup script updated. | ${jsFilePath}`);
+    if (!this.isWatched) {
+      this.isWatched = true;
+    } else {
+      this.reloadServer.reload('RELOAD_POPUP_JS');
+      consola.info(`Popup script updated. | ${jsFilePath}`);
+    }
   }
 
   private watchFileOnChange(filePath: string) {
     this.reloadServer.reload('RELOAD_POPUP_HTML');
-    consola.info(`Popup resource updated. | ${filePath}`);
+
+    consola.info(`Popup script updated. | ${filePath}`);
   }
 
   /**

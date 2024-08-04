@@ -1,4 +1,4 @@
-import { BuildResult } from 'esbuild';
+import { BuildContext, BuildOptions, BuildResult } from 'esbuild';
 import { Watch, WatchImplements } from './Watch';
 import fse from 'fs-extra';
 import path from 'path';
@@ -9,9 +9,14 @@ import { loadStaticFile } from 'src/node/static/main';
 import { ReloadServer } from './server/reloadServer';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { defineCrxContentBuildIdPlugin } from '../utils';
+import { FSWatcher } from 'chokidar';
 
 export class WatchContentScripts extends Watch implements WatchImplements {
   private readonly crxContentBuildId: string;
+
+  private jsWatchCtxs: Record<string, BuildContext<BuildOptions>> | null = null;
+  private fileWatchCtx: FSWatcher | null = null;
+  private isWatched = false;
 
   constructor(
     manifest: CrxMonkeyManifest,
@@ -23,6 +28,28 @@ export class WatchContentScripts extends Watch implements WatchImplements {
     this.crxContentBuildId = crypto.randomUUID();
   }
 
+  public async dispose() {
+    if (this.jsWatchCtxs === null || this.fileWatchCtx === null) {
+      throw consola.error(new Error('Dispose can be used after Watch is started'));
+    }
+
+    const jsWatchCtxs = this.jsWatchCtxs;
+
+    /**
+     * Dispose contexts of watch js.
+     */
+    await Promise.all(
+      Object.keys(jsWatchCtxs).map(async (jsWatchCtxKey) => {
+        const jsWatchCtx = jsWatchCtxs[jsWatchCtxKey];
+
+        await jsWatchCtx.cancel();
+        await jsWatchCtx.dispose();
+      }),
+    );
+
+    this.fileWatchCtx.close();
+  }
+
   public async watch(): Promise<void> {
     const contentScripts = this.manifest.content_scripts;
 
@@ -31,7 +58,7 @@ export class WatchContentScripts extends Watch implements WatchImplements {
 
       this.copyCssFiles(cssFiles);
 
-      await this.watchByJsFilePaths(
+      this.jsWatchCtxs = await this.watchByJsFilePaths(
         jsFiles,
         (...args) => {
           this.watchJsOnBuild(...args);
@@ -41,7 +68,7 @@ export class WatchContentScripts extends Watch implements WatchImplements {
         [defineCrxContentBuildIdPlugin(this.crxContentBuildId)],
       );
 
-      this.watchFiles(cssFiles, (cssPath) => {
+      this.fileWatchCtx = this.watchFiles(cssFiles, (cssPath) => {
         this.reloadServer.reload('RELOAD_CSS');
 
         consola.info(`CSS updated. | ${cssPath}`);
@@ -54,8 +81,12 @@ export class WatchContentScripts extends Watch implements WatchImplements {
   }
 
   private watchJsOnBuild(result: BuildResult, filePath: string) {
-    this.reloadServer.reload('RELOAD_CONTENT_SCRIPT');
-    consola.info(`Content script updated. | ${filePath}`);
+    if (!this.isWatched) {
+      this.isWatched = true;
+    } else {
+      this.reloadServer.reload('RELOAD_CONTENT_SCRIPT');
+      consola.info(`Content script updated. | ${filePath}`);
+    }
   }
 
   private watchJsOnFirstBuild(result: BuildResult, filePath: string) {

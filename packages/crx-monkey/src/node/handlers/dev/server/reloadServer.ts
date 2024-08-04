@@ -40,6 +40,10 @@ export class ReloadServer {
       socket.send(data);
     });
   }
+
+  public dispose() {
+    this.wserver.close();
+  }
 }
 
 export type ReloadTokens =

@@ -2,6 +2,47 @@ import { getConfig } from '../config';
 import path from 'path';
 import fse from 'fs-extra';
 import { Plugin } from 'esbuild';
+import { CrxMonkeyConfig, CrxMonkeyManifest } from '../types';
+import consola from 'consola';
+import { resolveFilePath } from '../file';
+
+/**
+ * Get manifest json or js
+ */
+export async function getManifest(config: CrxMonkeyConfig) {
+  if (!fse.existsSync(config.manifestPath)) {
+    throw consola.error(
+      new Error(
+        `The manifest file ${config.manifestPath} does not exist. If you using json? set "manifestPath" to "crx-monkey.config.js"`,
+      ),
+    );
+  }
+
+  const manifestExt = config.manifestPath.split('.').pop();
+
+  let manifest: CrxMonkeyManifest;
+
+  if (manifestExt === 'json') {
+    const data = fse.readFileSync(config.manifestPath);
+    manifest = JSON.parse(data.toString());
+  } else if (manifestExt === 'js') {
+    const manifestPath = resolveFilePath(config.manifestPath);
+    manifest = await loadJsResource(manifestPath);
+  } else {
+    throw consola.error(new Error('Only js and json manifests can be loaded.'));
+  }
+
+  return manifest;
+}
+
+export async function loadJsResource(filePath: string) {
+  const data = fse.readFileSync(filePath, {});
+  const tmpFilePath = path.resolve('./', crypto.randomUUID());
+  await fse.outputFile(tmpFilePath, data.toString());
+  const module = (await import(tmpFilePath)).default;
+  fse.removeSync(tmpFilePath);
+  return module;
+}
 
 /**
  * Copy the locales dir to dist.

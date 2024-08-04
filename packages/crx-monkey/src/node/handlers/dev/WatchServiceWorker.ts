@@ -1,5 +1,5 @@
 import { Watch, WatchImplements } from './Watch';
-import { BuildOptions, BuildResult, Plugin } from 'esbuild';
+import { BuildContext, BuildOptions, BuildResult, Plugin } from 'esbuild';
 import fse from 'fs-extra';
 import path from 'path';
 import consola from 'consola';
@@ -7,11 +7,32 @@ import { CrxMonkeyConfig } from 'src/node/types';
 import { loadStaticFile } from 'src/node/static/main';
 
 export class WatchServiceWorker extends Watch implements WatchImplements {
+  private jsWatchCtxs: Record<string, BuildContext<BuildOptions>> | null = null;
+  private isWatched = false;
+
+  public async dispose() {
+    if (this.jsWatchCtxs === null) {
+      throw consola.error(new Error('Dispose can be used after Watch is started'));
+    }
+
+    const jsWatchCtxs = this.jsWatchCtxs;
+
+    /**
+     * Dispose contexts of watch js.
+     */
+    await Promise.all(
+      Object.keys(jsWatchCtxs).map(async (jsWatchCtxKey) => {
+        const jsWatchCtx = jsWatchCtxs[jsWatchCtxKey];
+        await jsWatchCtx.dispose();
+      }),
+    );
+  }
+
   public async watch(): Promise<void> {
     const serviceWorkerJsFile = this.manifest.background?.service_worker;
 
     if (serviceWorkerJsFile !== undefined) {
-      await this.watchByJsFilePaths(
+      this.jsWatchCtxs = await this.watchByJsFilePaths(
         [serviceWorkerJsFile],
         (...args) => {
           this.watchJsOnBuild(...args);
@@ -37,8 +58,12 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
   }
 
   private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
-    this.reloadServer.reload('RELOAD_SW');
-    consola.info(`Service worker updated. | ${jsFilePath}`);
+    if (!this.isWatched) {
+      this.isWatched = true;
+    } else {
+      this.reloadServer.reload('RELOAD_SW');
+      consola.info(`Service worker updated. | ${jsFilePath}`);
+    }
   }
 
   private watchJsOnFirstBuild(result: BuildResult<BuildOptions>) {
