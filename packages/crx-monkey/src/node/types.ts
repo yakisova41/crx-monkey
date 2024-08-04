@@ -86,5 +86,6 @@ export type CrxMonkeyContentScripts = Array<{
   userscript_direct_inject?: boolean;
   connection_isolated?: boolean;
   bind_GM_api?: boolean;
+  trusted_inject?: boolean;
   [key: string]: unknown;
 }>;
