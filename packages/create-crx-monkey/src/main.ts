@@ -50,7 +50,6 @@ const manifestJsonPrototype = {
   background: {
     service_worker: `src/sw/sw.${isTs ? 'ts' : 'js'}`,
   },
-  run_at: 'document_end',
 };
 
 const manifestJs = `
