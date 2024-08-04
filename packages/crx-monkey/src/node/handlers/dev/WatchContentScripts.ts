@@ -113,7 +113,13 @@ export class WatchContentScripts extends Watch implements WatchImplements {
 
       fse.outputFile(connectorPath, connectorContent);
 
-      this.manifestFactory.addContentScript([connectorFilename], [], matches, 'ISOLATED');
+      this.manifestFactory.addContentScript(
+        [connectorFilename],
+        [],
+        matches,
+        'ISOLATED',
+        'document_start',
+      );
     }
   }
 }
