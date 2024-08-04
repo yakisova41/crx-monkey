@@ -1,4 +1,4 @@
-import { CrxMonkeyManifest } from 'src/node/types';
+import { CrxMonkeyConfig, CrxMonkeyManifest } from 'src/node/types';
 import { Watch, WatchImplements } from './Watch';
 import { ManifestFactory } from 'src/node/manifest-factory';
 import { ReloadServer } from './server/reloadServer';
@@ -6,20 +6,24 @@ import fse from 'fs-extra';
 import path from 'path';
 import consola from 'consola';
 import { FSWatcher } from 'chokidar';
-import { HandleDev } from '.';
 
 export class WatchOtherResources extends Watch implements WatchImplements {
   private fileWatchCtx: FSWatcher | null = null;
-  private readonly handleDev: HandleDev;
-
+  private readonly watchers: WatchImplements[];
+  private readonly setupWatchFunc: (
+    config: CrxMonkeyConfig,
+    reloadServer: ReloadServer,
+  ) => Promise<void>;
   constructor(
     manifest: CrxMonkeyManifest,
     manifestFactory: ManifestFactory,
     reloadServer: ReloadServer,
-    handleDev: HandleDev,
+    watchers: WatchImplements[],
+    setupWatchFunc: (config: CrxMonkeyConfig, reloadServer: ReloadServer) => Promise<void>,
   ) {
     super(manifest, manifestFactory, reloadServer);
-    this.handleDev = handleDev;
+    this.watchers = watchers;
+    this.setupWatchFunc = setupWatchFunc;
   }
 
   public async watch() {
@@ -28,9 +32,10 @@ export class WatchOtherResources extends Watch implements WatchImplements {
     this.fileWatchCtx = this.watchFiles([...targets], (filePath) => {
       if (filePath === this.config.manifestPath) {
         // Manifest changed
-        this.handleDev.reload();
 
         consola.success(`Manifest updated. | ${filePath}`);
+
+        this.reload().then();
       }
     });
   }
@@ -41,5 +46,15 @@ export class WatchOtherResources extends Watch implements WatchImplements {
     }
 
     this.fileWatchCtx.close();
+  }
+
+  private async reload() {
+    await Promise.all(
+      this.watchers.map(async (watcher) => {
+        await watcher.dispose();
+      }),
+    );
+
+    await this.setupWatchFunc(this.config, this.reloadServer);
   }
 }

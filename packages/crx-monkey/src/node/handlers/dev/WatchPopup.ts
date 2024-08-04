@@ -294,11 +294,10 @@ export class WatchPopup extends Watch implements WatchImplements {
   }
 
   private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
-    this.reloadServer.reload('RELOAD_POPUP_JS');
-
     if (!this.isWatched) {
       this.isWatched = true;
     } else {
+      this.reloadServer.reload('RELOAD_POPUP_JS');
       consola.info(`Popup script updated. | ${jsFilePath}`);
     }
   }

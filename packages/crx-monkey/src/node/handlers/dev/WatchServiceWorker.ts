@@ -58,11 +58,10 @@ export class WatchServiceWorker extends Watch implements WatchImplements {
   }
 
   private watchJsOnBuild(result: BuildResult<BuildOptions>, jsFilePath: string) {
-    this.reloadServer.reload('RELOAD_SW');
-
     if (!this.isWatched) {
       this.isWatched = true;
     } else {
+      this.reloadServer.reload('RELOAD_SW');
       consola.info(`Service worker updated. | ${jsFilePath}`);
     }
   }

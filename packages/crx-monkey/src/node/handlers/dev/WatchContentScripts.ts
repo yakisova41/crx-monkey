@@ -81,11 +81,10 @@ export class WatchContentScripts extends Watch implements WatchImplements {
   }
 
   private watchJsOnBuild(result: BuildResult, filePath: string) {
-    this.reloadServer.reload('RELOAD_CONTENT_SCRIPT');
-
     if (!this.isWatched) {
       this.isWatched = true;
     } else {
+      this.reloadServer.reload('RELOAD_CONTENT_SCRIPT');
       consola.info(`Content script updated. | ${filePath}`);
     }
   }
