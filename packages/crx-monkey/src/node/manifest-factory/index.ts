@@ -52,6 +52,7 @@ export class ManifestFactory {
     css: string[],
     matches: string[],
     world: 'MAIN' | 'ISOLATED' = 'ISOLATED',
+    run_at: 'document_start' | 'document_end' | 'document_idle' | undefined = undefined,
   ) {
     if (this.workspace.content_scripts !== undefined) {
       this.workspace.content_scripts.push({
@@ -59,6 +60,7 @@ export class ManifestFactory {
         js,
         css,
         world,
+        run_at,
       });
     }
   }
