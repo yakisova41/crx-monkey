@@ -34,7 +34,7 @@ const packageJsonPrototype = {
 };
 
 const manifestJsonPrototype = {
-  name: 'projectName',
+  name: projectName,
   version: '1.0.0',
   manifest_version: 3,
   description: 'description',
@@ -50,7 +50,6 @@ const manifestJsonPrototype = {
   background: {
     service_worker: `src/sw/sw.${isTs ? 'ts' : 'js'}`,
   },
-  run_at: 'document_end',
 };
 
 const manifestJs = `
