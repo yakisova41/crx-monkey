@@ -24,7 +24,8 @@ const manifest = {
       world: 'MAIN',
       connection_isolated: true,
       userscript_direct_inject: true,
-      bind_GM_api: false
+      bind_GM_api: false,
+      trusted_inject: false
     },
   ],
   background: {
@@ -90,3 +91,17 @@ When this option is enabled, an **unsafeWindow** is automatically added to the *
 This is a means of using the **GM API** when code is running directly on the DOM with **userscript_direct_inject** enabled.
 
 We will try to hide as much as possible by using random variable names, but the security is undeniably reduced.
+
+### trusted_inject
+
+```js
+{
+    "content_scripts": [
+        {
+          "trusted_inject": true
+        }
+    ]
+}
+```
+
+When **userscript_direct_inject** is enabled, scripts are injected into the DOM using **Trusted Types** if the browser supports it.
