@@ -25,7 +25,7 @@ window.addEventListener('message', (e) => {
           );
           break;
         case 'on-message':
-          () => {
+          (() => {
             const handleMessage = (request, sender) => {
               target.dispatchEvent(
                 new CustomEvent('crx-isolate-connector-result', {
@@ -39,8 +39,7 @@ window.addEventListener('message', (e) => {
             };
             messageListeners[data.actionId] = handleMessage;
             chrome.runtime.onMessage.addListener(handleMessage);
-          };
-
+          })();
           break;
 
         case 'remove-on-message':
