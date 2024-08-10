@@ -20,9 +20,14 @@ if (runtime === 'Extension') {
     console.log('Extension id:', id);
   });
 
-  bypassMessage((msg) => {
+  const listener = bypassMessage((msg) => {
     console.log('Receved a message by service worker.', msg);
   });
+
+  setTimeout(() => {
+    console.log('REMOVE');
+    listener.remove();
+  }, 5000);
 
   console.log('Send a message to service worker.');
   bypassSendMessage({ msg: 'Hi' });

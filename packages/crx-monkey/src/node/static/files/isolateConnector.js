@@ -1,4 +1,7 @@
 /* eslint-disable no-undef */
+
+const messageListeners = {};
+
 window.addEventListener('message', (e) => {
   const { data, target } = e;
 
@@ -22,7 +25,7 @@ window.addEventListener('message', (e) => {
           );
           break;
         case 'on-message':
-          chrome.runtime.onMessage.addListener((request, sender) => {
+          const handleMessage = (request, sender) => {
             target.dispatchEvent(
               new CustomEvent('crx-isolate-connector-result', {
                 detail: {
@@ -32,7 +35,16 @@ window.addEventListener('message', (e) => {
                 },
               }),
             );
-          });
+          };
+          messageListeners[data.actionId] = handleMessage;
+          chrome.runtime.onMessage.addListener(handleMessage);
+          break;
+
+        case 'remove-on-message':
+          if (messageListeners[data.actionId] !== undefined) {
+            chrome.runtime.onMessage.removeListener(messageListeners[data.actionId]);
+          }
+
           break;
 
         case 'send-message':

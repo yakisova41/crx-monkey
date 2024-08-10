@@ -34,7 +34,9 @@ export async function getExtensionId() {
  */
 export function bypassMessage<T = never>(
   callback: (request: T, sender: chrome.runtime.MessageSender) => void,
-) {
+): {
+  remove: () => void;
+} {
   const actionId = crypto.randomUUID();
 
   window.postMessage(
@@ -47,13 +49,29 @@ export function bypassMessage<T = never>(
     '*',
   );
 
-  waitResult<{ request: T; sender: { id: string; origin: string } }>(
+  const waiter = waitResult<{ request: T; sender: { id: string; origin: string } }>(
     'on-message',
     actionId,
     (data) => {
       callback(data.request, data.sender);
     },
   );
+
+  return {
+    remove: () => {
+      waiter.remove();
+
+      window.postMessage(
+        {
+          type: 'remove-on-message',
+          crxContentBuildId: window.__CRX_CONTENT_BUILD_ID,
+          detail: null,
+          actionId,
+        },
+        '*',
+      );
+    },
+  };
 }
 
 /**
@@ -85,7 +103,7 @@ export async function bypassSendMessage<T = never, U = never>(
   }
 }
 
-async function waitResult<T = string>(type: string, actionId: string, callback: (data: T) => void) {
+function waitResult<T = string>(type: string, actionId: string, callback: (data: T) => void) {
   const onResult = (e: IsolateConnectorEvent<T>) => {
     if (e.detail.type === type && e.detail.actionId === actionId) {
       callback(e.detail.data);
@@ -93,6 +111,12 @@ async function waitResult<T = string>(type: string, actionId: string, callback: 
   };
 
   window.addEventListener('crx-isolate-connector-result', onResult);
+
+  return {
+    remove: () => {
+      window.removeEventListener('crx-isolate-connector-result', onResult);
+    },
+  };
 }
 
 async function waitResultOnce<T = string>(type: string, actionId: string): Promise<T> {
