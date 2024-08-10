@@ -25,19 +25,22 @@ window.addEventListener('message', (e) => {
           );
           break;
         case 'on-message':
-          const handleMessage = (request, sender) => {
-            target.dispatchEvent(
-              new CustomEvent('crx-isolate-connector-result', {
-                detail: {
-                  type: 'on-message',
-                  data: { request, sender },
-                  actionId: data.actionId,
-                },
-              }),
-            );
+          () => {
+            const handleMessage = (request, sender) => {
+              target.dispatchEvent(
+                new CustomEvent('crx-isolate-connector-result', {
+                  detail: {
+                    type: 'on-message',
+                    data: { request, sender },
+                    actionId: data.actionId,
+                  },
+                }),
+              );
+            };
+            messageListeners[data.actionId] = handleMessage;
+            chrome.runtime.onMessage.addListener(handleMessage);
           };
-          messageListeners[data.actionId] = handleMessage;
-          chrome.runtime.onMessage.addListener(handleMessage);
+
           break;
 
         case 'remove-on-message':
