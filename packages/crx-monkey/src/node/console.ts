@@ -1,10 +1,12 @@
-import pkg from '../../package.json';
-
 export class ConsoleApp {
   private readonly handlers: Handler[] = [];
+  private readonly appVersion: string;
+  private readonly appName: string;
 
-  public constructor() {
+  public constructor(appName: string, appVersion: string) {
     this.addCommand('help', this.getHelp(), [], 'help');
+    this.appVersion = appVersion;
+    this.appName = appName;
   }
 
   public addCommand(
@@ -93,7 +95,7 @@ export class ConsoleApp {
     return () => {
       const space = '  ';
 
-      console.log(`\u001b[36mCRX MONKEY\x1b[32m v${pkg.version} \u001b[0m\n`);
+      console.log(`\u001b[36m${this.appName}\x1b[32m v${this.appVersion} \u001b[0m\n`);
       console.log('Commands:');
 
       this.handlers.forEach((handler) => {
